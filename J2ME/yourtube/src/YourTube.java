@@ -639,7 +639,7 @@ public class YourTube extends MIDlet implements CommandListener {
                                 public void run() {
                                     ShowProgressMessage("Loading video properties...");
 
-                                    Vector available_formats = UtilClass.GetAvailableFormats(youtube_video.GetURL());
+                                    Vector available_formats = UtilClass.GetAvailableFormats(youtube_video.GetVideoId());
 
                                     if (available_formats != null) {
                                         AvailableVideoFormatNames      = new Vector();
@@ -709,7 +709,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
                                     DownloadClass download = new DownloadClass(DownloadClass.STATE_QUEUED,
                                                                                ((Integer)AvailableVideoFormatIds.elementAt(DownloadVideoFormatChoiceGroup.getSelectedIndex())).intValue(),
-                                                                               0, 0, youtube_video.GetTitle(), youtube_video.GetURL(),
+                                                                               0, 0, youtube_video.GetTitle(), youtube_video.GetVideoId(),
                                                                                DownloadFileNameTextField.getString(),
                                                                                (String)AvailableVideoFormatExtensions.elementAt(DownloadVideoFormatChoiceGroup.getSelectedIndex()),
                                                                                "");

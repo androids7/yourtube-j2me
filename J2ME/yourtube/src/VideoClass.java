@@ -1,8 +1,8 @@
 public class VideoClass extends Object {
     private int    Duration, ViewCount;
-    private String Title, Description, Author, URL, ThumbnailURL, PreviewURL;
+    private String Title, Description, Author, VideoId, ThumbnailURL, PreviewURL;
 
-    public VideoClass(int duration, int view_count, String title, String description, String author, String url, String thumbnail_url, String preview_url) {
+    public VideoClass(int duration, int view_count, String title, String description, String author, String video_id, String thumbnail_url, String preview_url) {
         super();
 
         Duration     = duration;
@@ -10,7 +10,7 @@ public class VideoClass extends Object {
         Title        = title;
         Description  = description;
         Author       = author;
-        URL          = url;
+        VideoId      = video_id;
         ThumbnailURL = thumbnail_url;
         PreviewURL   = preview_url;
     }
@@ -35,8 +35,8 @@ public class VideoClass extends Object {
         return Author;
     }
 
-    public String GetURL() {
-        return URL;
+    public String GetVideoId() {
+        return VideoId;
     }
 
     public String GetThumbnailURL() {

@@ -7,14 +7,19 @@ public class DownloaderClass extends Object {
     private static final int SLEEP_DELAY = 1000;
     private static final int BUF_SIZE    = 262144;
 
-    private static final String YOUTUBE_NOMOBILE = "1";
-    private static final String USER_AGENT       = "YourTube";
+    private static final String YOUTUBE_VINFO_URL  = "http://www.youtube.com/get_video_info";
+    private static final String YOUTUBE_VINFO_EL   = "detailpage";
+    private static final String YOUTUBE_VINFO_PS   = "default";
+    private static final String YOUTUBE_VINFO_EURL = "";
+    private static final String YOUTUBE_VINFO_GL   = "US";
+    private static final String YOUTUBE_VINFO_HL   = "en";
+    private static final String USER_AGENT         = "YourTube";
 
     private static boolean StopDownloader;
 
     private static Thread DownloaderThread = null;
 
-    private static Hashtable GetFmtMetadata(String url, int format) {
+    private static Hashtable GetFmtMetadata(String video_id, int format) {
         int                   chars_read;
         String                visitor_info1_live_cookie;
         StringBuffer          buffer;
@@ -24,7 +29,13 @@ public class DownloaderClass extends Object {
         InputStreamReader     stream_reader = null;
 
         try {
-            connection = (HttpConnection)Connector.open(url + "&nomobile=" + YOUTUBE_NOMOBILE);
+            connection = (HttpConnection)Connector.open(YOUTUBE_VINFO_URL +
+                                                        "?video_id="      + UtilClass.URLEncode(video_id) +
+                                                        "&el="            + YOUTUBE_VINFO_EL +
+                                                        "&ps="            + YOUTUBE_VINFO_PS +
+                                                        "&eurl="          + YOUTUBE_VINFO_EURL +
+                                                        "&gl="            + YOUTUBE_VINFO_GL +
+                                                        "&hl="            + YOUTUBE_VINFO_HL);
 
             connection.setRequestMethod(HttpConnection.GET);
             connection.setRequestProperty("User-Agent", USER_AGENT);
@@ -61,95 +72,83 @@ public class DownloaderClass extends Object {
             int    begin  = tmpstr.indexOf("url_encoded_fmt_stream_map=");
 
             if (begin != -1) {
-                int end = tmpstr.indexOf("\\u0026amp;", begin + 27);
+                int end = tmpstr.indexOf("&", begin + 27);
 
                 if (end == -1) {
-                    end = tmpstr.indexOf("\"", begin + 27);
+                    end = tmpstr.length();
                 }
 
-                if (end != -1) {
-                    Vector url_encoded_fmt_stream_map = new Vector();
+                Vector url_encoded_fmt_stream_map = new Vector();
 
-                    tmpstr = UtilClass.URLDecode(tmpstr.substring(begin + 27, end));
+                tmpstr = UtilClass.URLDecode(tmpstr.substring(begin + 27, end));
 
-                    begin = 0;
-                    end   = tmpstr.indexOf(",");
+                begin = 0;
+                end   = tmpstr.indexOf(",");
 
-                    while (end != -1) {
-                        url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, end));
+                while (end != -1) {
+                    url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, end));
 
-                        begin = end + 1;
-                        end   = tmpstr.indexOf(",", begin);
-                    }
+                    begin = end + 1;
+                    end   = tmpstr.indexOf(",", begin);
+                }
 
-                    url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, tmpstr.length()));
+                url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, tmpstr.length()));
 
-                    result = new Hashtable();
+                result = new Hashtable();
 
-                    Enumeration url_encoded_fmt_stream_map_enum = url_encoded_fmt_stream_map.elements();
+                Enumeration url_encoded_fmt_stream_map_enum = url_encoded_fmt_stream_map.elements();
 
-                    while (url_encoded_fmt_stream_map_enum.hasMoreElements()) {
-                        tmpstr = (String)url_encoded_fmt_stream_map_enum.nextElement();
+                while (url_encoded_fmt_stream_map_enum.hasMoreElements()) {
+                    tmpstr = (String)url_encoded_fmt_stream_map_enum.nextElement();
 
-                        begin = tmpstr.indexOf("itag=");
+                    begin = tmpstr.indexOf("itag=");
 
-                        if (begin != -1) {
-                            end = tmpstr.indexOf("&", begin + 5);
+                    if (begin != -1) {
+                        end = tmpstr.indexOf("&", begin + 5);
 
-                            if (end == -1) {
-                                end = tmpstr.length();
+                        if (end == -1) {
+                            end = tmpstr.length();
+                        }
+
+                        int fmt = Integer.parseInt(tmpstr.substring(begin + 5, end));
+
+                        if (fmt == format) {
+                            String signature = "";
+
+                            begin = tmpstr.indexOf("sig=");
+
+                            if (begin != -1) {
+                                end = tmpstr.indexOf("&", begin + 4);
+
+                                if (end == -1) {
+                                    end = tmpstr.length();
+                                }
+
+                                signature = UtilClass.URLDecode(tmpstr.substring(begin + 4, end));
                             }
 
-                            int fmt = Integer.parseInt(tmpstr.substring(begin + 5, end));
+                            begin = tmpstr.indexOf("url=");
 
-                            if (fmt == format) {
-                                begin = tmpstr.indexOf("url=");
+                            if (begin != -1) {
+                                end = tmpstr.indexOf("&", begin + 4);
 
-                                if (begin != -1) {
-                                    tmpstr = UtilClass.URLDecode(tmpstr.substring(begin + 4, tmpstr.length()));
-
-                                    begin = tmpstr.indexOf("type=");
-
-                                    if (begin != -1) {
-                                        end = tmpstr.indexOf("&", begin + 5);
-
-                                        if (end == -1) {
-                                            end = tmpstr.length();
-                                        }
-
-                                        String type = tmpstr.substring(begin + 5, end);
-
-                                        if (!UtilClass.URLEncodedOk(type)) {
-                                            type = UtilClass.URLEncode(type);
-                                        }
-
-                                        tmpstr = tmpstr.substring(0, begin) + "type=" + type + tmpstr.substring(end, tmpstr.length());
-                                    }
-
-                                    if (tmpstr.indexOf("signature=") == -1) {
-                                        begin = tmpstr.indexOf("sig=");
-
-                                        if (begin != -1) {
-                                            end = tmpstr.indexOf("&", begin + 4);
-
-                                            if (end == -1) {
-                                                end = tmpstr.length();
-                                            }
-
-                                            tmpstr = tmpstr + "&signature=" + tmpstr.substring(begin + 4, end);
-                                        }
-                                    }
-
-                                    result.put(new String("VISITOR_INFO1_LIVE_COOKIE"), visitor_info1_live_cookie);
-                                    result.put(new String("URL"),                       tmpstr);
-
-                                    break;
+                                if (end == -1) {
+                                    end = tmpstr.length();
                                 }
+
+                                String url = UtilClass.URLDecode(tmpstr.substring(begin + 4, end));
+
+                                if (url.indexOf("signature=") == -1 && !signature.equals("")) {
+                                    url = url + "&signature=" + signature;
+                                }
+
+                                result.put(new String("VISITOR_INFO1_LIVE_COOKIE"), visitor_info1_live_cookie);
+                                result.put(new String("URL"),                       url);
+
+                                break;
                             }
                         }
                     }
-                } else {
-                    result = new Hashtable();
                 }
             } else {
                 result = new Hashtable();
@@ -260,7 +259,7 @@ public class DownloaderClass extends Object {
 
                                 SetDownloadState(active_download, DownloadClass.STATE_ACTIVE, "");
 
-                                Hashtable metadata = GetFmtMetadata(active_download.GetURL(), active_download.GetFormat());
+                                Hashtable metadata = GetFmtMetadata(active_download.GetVideoId(), active_download.GetFormat());
 
                                 if (metadata != null) {
                                     if (metadata.containsKey(new String("VISITOR_INFO1_LIVE_COOKIE"))) {

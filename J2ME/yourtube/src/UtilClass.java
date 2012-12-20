@@ -12,8 +12,13 @@ public class UtilClass extends Object {
     private static final String URL_UNRESERVED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
     private static final String URL_ENCODEDOK  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~%";
 
-    private static final String YOUTUBE_NOMOBILE = "1";
-    private static final String USER_AGENT       = "YourTube";
+    private static final String YOUTUBE_VINFO_URL  = "http://www.youtube.com/get_video_info";
+    private static final String YOUTUBE_VINFO_EL   = "detailpage";
+    private static final String YOUTUBE_VINFO_PS   = "default";
+    private static final String YOUTUBE_VINFO_EURL = "";
+    private static final String YOUTUBE_VINFO_GL   = "US";
+    private static final String YOUTUBE_VINFO_HL   = "en";
+    private static final String USER_AGENT         = "YourTube";
 
     public static String URLDecode(String str) {
         StringBuffer buf = new StringBuffer();
@@ -256,7 +261,7 @@ public class UtilClass extends Object {
         }
     }
 
-    public static Vector GetAvailableFormats(String url) {
+    public static Vector GetAvailableFormats(String video_id) {
         int                   chars_read;
         Vector                result;
         StringBuffer          buffer;
@@ -265,7 +270,13 @@ public class UtilClass extends Object {
         InputStreamReader     stream_reader = null;
 
         try {
-            connection = (HttpConnection)Connector.open(url + "&nomobile=" + YOUTUBE_NOMOBILE);
+            connection = (HttpConnection)Connector.open(YOUTUBE_VINFO_URL +
+                                                        "?video_id="      + UtilClass.URLEncode(video_id) +
+                                                        "&el="            + YOUTUBE_VINFO_EL +
+                                                        "&ps="            + YOUTUBE_VINFO_PS +
+                                                        "&eurl="          + YOUTUBE_VINFO_EURL +
+                                                        "&gl="            + YOUTUBE_VINFO_GL +
+                                                        "&hl="            + YOUTUBE_VINFO_HL);
 
             connection.setRequestMethod(HttpConnection.GET);
             connection.setRequestProperty("User-Agent", USER_AGENT);
@@ -284,50 +295,46 @@ public class UtilClass extends Object {
             int    begin  = tmpstr.indexOf("url_encoded_fmt_stream_map=");
 
             if (begin != -1) {
-                int end = tmpstr.indexOf("\\u0026amp;", begin + 27);
+                int end = tmpstr.indexOf("&", begin + 27);
 
                 if (end == -1) {
-                    end = tmpstr.indexOf("\"", begin + 27);
+                    end = tmpstr.length();
                 }
 
-                if (end != -1) {
-                    Vector url_encoded_fmt_stream_map = new Vector();
+                Vector url_encoded_fmt_stream_map = new Vector();
 
-                    tmpstr = UtilClass.URLDecode(tmpstr.substring(begin + 27, end));
+                tmpstr = UtilClass.URLDecode(tmpstr.substring(begin + 27, end));
 
-                    begin = 0;
-                    end   = tmpstr.indexOf(",");
+                begin = 0;
+                end   = tmpstr.indexOf(",");
 
-                    while (end != -1) {
-                        url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, end));
+                while (end != -1) {
+                    url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, end));
 
-                        begin = end + 1;
-                        end   = tmpstr.indexOf(",", begin);
-                    }
+                    begin = end + 1;
+                    end   = tmpstr.indexOf(",", begin);
+                }
 
-                    url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, tmpstr.length()));
+                url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, tmpstr.length()));
 
-                    result = new Vector();
+                result = new Vector();
 
-                    Enumeration url_encoded_fmt_stream_map_enum = url_encoded_fmt_stream_map.elements();
+                Enumeration url_encoded_fmt_stream_map_enum = url_encoded_fmt_stream_map.elements();
 
-                    while (url_encoded_fmt_stream_map_enum.hasMoreElements()) {
-                        tmpstr = (String)url_encoded_fmt_stream_map_enum.nextElement();
+                while (url_encoded_fmt_stream_map_enum.hasMoreElements()) {
+                    tmpstr = (String)url_encoded_fmt_stream_map_enum.nextElement();
 
-                        begin = tmpstr.indexOf("itag=");
+                    begin = tmpstr.indexOf("itag=");
 
-                        if (begin != -1) {
-                            end = tmpstr.indexOf("&", begin + 5);
+                    if (begin != -1) {
+                        end = tmpstr.indexOf("&", begin + 5);
 
-                            if (end == -1) {
-                                end = tmpstr.length();
-                            }
-
-                            result.addElement(Integer.valueOf(tmpstr.substring(begin + 5, end)));
+                        if (end == -1) {
+                            end = tmpstr.length();
                         }
+
+                        result.addElement(Integer.valueOf(tmpstr.substring(begin + 5, end)));
                     }
-                } else {
-                    result = null;
                 }
             } else {
                 result = null;

@@ -75,8 +75,8 @@ public class DownloadStorageClass extends Object {
             ValidateErrorMsg = "Download task title is empty";
 
             return false;
-        } else if (download.GetURL().equals("")) {
-            ValidateErrorMsg = "Download task URL is empty";
+        } else if (download.GetVideoId().equals("")) {
+            ValidateErrorMsg = "Download task video id is empty";
 
             return false;
         } else if (download.GetFullFileName().equals("")) {

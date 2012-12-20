@@ -55,7 +55,7 @@ public class SearchClass extends Object {
                         String video_title         = "";
                         String video_description   = "";
                         String video_author        = "";
-                        String video_url           = "";
+                        String video_id            = "";
                         String thumbnail_url       = "";
                         String preview_url         = "";
 
@@ -83,7 +83,23 @@ public class SearchClass extends Object {
                                     Node media_item = (Node)item.children.elementAt(k);
 
                                     if (media_item.getName().equals("media:player") && media_item.attributes.get("url") != null) {
-                                        video_url = (String)media_item.attributes.get("url");
+                                        String video_url = (String)media_item.attributes.get("url");
+
+                                        int begin = video_url.indexOf("?v=");
+
+                                        if (begin == -1) {
+                                            begin = video_url.indexOf("&v=");
+                                        }
+
+                                        if (begin != -1) {
+                                            int end = video_url.indexOf("&", begin + 3);
+
+                                            if (end == -1) {
+                                                end = video_url.length();
+                                            }
+
+                                            video_id = UtilClass.URLDecode(video_url.substring(begin + 3, end));
+                                        }
                                     } else if (media_item.getName().equals("media:thumbnail") && media_item.attributes.get("url") != null) {
                                         if (media_item.attributes.get("width") != null) {
                                             try {
@@ -129,8 +145,8 @@ public class SearchClass extends Object {
                         }
 
                         if (video_duration != 0 && !video_title.equals("") && !video_description.equals("") && !video_author.equals("") &&
-                                                   !video_url.equals("")   && !thumbnail_url.equals("")     && !preview_url.equals("")) {
-                            search_results.addElement(new VideoClass(video_duration, view_count, video_title, video_description, video_author, video_url, thumbnail_url, preview_url));
+                                                   !video_id.equals("")    && !thumbnail_url.equals("")     && !preview_url.equals("")) {
+                            search_results.addElement(new VideoClass(video_duration, view_count, video_title, video_description, video_author, video_id, thumbnail_url, preview_url));
                         }
                     }
                 }

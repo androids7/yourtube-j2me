@@ -8,9 +8,9 @@ public class DownloadClass extends Object {
 
     private int    Id, State, Format;
     private long   Size, Done;
-    private String Title, URL, FileName, FileExtension, ErrorMsg;
+    private String Title, VideoId, FileName, FileExtension, ErrorMsg;
 
-    public DownloadClass(int state, int format, long size, long done, String title, String url, String file_name, String file_extension, String error_msg) {
+    public DownloadClass(int state, int format, long size, long done, String title, String video_id, String file_name, String file_extension, String error_msg) {
         super();
 
         Id            = 0;
@@ -19,7 +19,7 @@ public class DownloadClass extends Object {
         Size          = size;
         Done          = done;
         Title         = title;
-        URL           = url;
+        VideoId       = video_id;
         FileName      = file_name;
         FileExtension = file_extension;
         ErrorMsg      = error_msg;
@@ -34,7 +34,7 @@ public class DownloadClass extends Object {
         Size          = download.Size;
         Done          = download.Done;
         Title         = new String(download.Title);
-        URL           = new String(download.URL);
+        VideoId       = new String(download.VideoId);
         FileName      = new String(download.FileName);
         FileExtension = new String(download.FileExtension);
         ErrorMsg      = new String(download.ErrorMsg);
@@ -52,7 +52,7 @@ public class DownloadClass extends Object {
         Size          = data_stream.readLong();
         Done          = data_stream.readLong();
         Title         = data_stream.readUTF();
-        URL           = data_stream.readUTF();
+        VideoId       = data_stream.readUTF();
         FileName      = data_stream.readUTF();
         FileExtension = data_stream.readUTF();
         ErrorMsg      = data_stream.readUTF();
@@ -106,8 +106,8 @@ public class DownloadClass extends Object {
         return Title;
     }
 
-    public String GetURL() {
-        return URL;
+    public String GetVideoId() {
+        return VideoId;
     }
 
     public String GetFileName() {
@@ -160,7 +160,7 @@ public class DownloadClass extends Object {
         data_stream.writeLong(Size);
         data_stream.writeLong(Done);
         data_stream.writeUTF(Title);
-        data_stream.writeUTF(URL);
+        data_stream.writeUTF(VideoId);
         data_stream.writeUTF(FileName);
         data_stream.writeUTF(FileExtension);
         data_stream.writeUTF(ErrorMsg);
