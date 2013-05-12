@@ -5,20 +5,12 @@ import javax.microedition.io.file.*;
 import javax.microedition.lcdui.*;
 
 public class UtilClass extends Object {
-    private static final int BUF_SIZE = 262144;
-
     private static final String HEXSTR         = "0123456789ABCDEF";
     private static final char   HEX[]          = "0123456789ABCDEF".toCharArray();
     private static final String URL_UNRESERVED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
     private static final String URL_ENCODEDOK  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~%";
 
-    private static final String YOUTUBE_VINFO_URL  = "http://www.youtube.com/get_video_info";
-    private static final String YOUTUBE_VINFO_EL   = "detailpage";
-    private static final String YOUTUBE_VINFO_PS   = "default";
-    private static final String YOUTUBE_VINFO_EURL = "";
-    private static final String YOUTUBE_VINFO_GL   = "US";
-    private static final String YOUTUBE_VINFO_HL   = "en";
-    private static final String USER_AGENT         = "YourTube";
+    private static final String USER_AGENT = "YourTube";
 
     public static String URLDecode(String str) {
         StringBuffer buf = new StringBuffer();
@@ -259,113 +251,6 @@ public class UtilClass extends Object {
         } else {
             return "";
         }
-    }
-
-    public static Vector GetAvailableFormats(String video_id) {
-        int                   chars_read;
-        Vector                result;
-        StringBuffer          buffer;
-        HttpConnection        connection = null;
-        InputStream           stream = null;
-        InputStreamReader     stream_reader = null;
-
-        try {
-            connection = (HttpConnection)Connector.open(YOUTUBE_VINFO_URL +
-                                                        "?video_id="      + UtilClass.URLEncode(video_id) +
-                                                        "&el="            + YOUTUBE_VINFO_EL +
-                                                        "&ps="            + YOUTUBE_VINFO_PS +
-                                                        "&eurl="          + YOUTUBE_VINFO_EURL +
-                                                        "&gl="            + YOUTUBE_VINFO_GL +
-                                                        "&hl="            + YOUTUBE_VINFO_HL);
-
-            connection.setRequestMethod(HttpConnection.GET);
-            connection.setRequestProperty("User-Agent", USER_AGENT);
-
-            stream        = connection.openInputStream();
-            stream_reader = new InputStreamReader(stream);
-            buffer        = new StringBuffer();
-
-            char buf[] = new char[BUF_SIZE];
-
-            while ((chars_read = stream_reader.read(buf, 0, BUF_SIZE)) != -1) {
-                buffer.append(buf, 0, chars_read);
-            }
-
-            String tmpstr = buffer.toString();
-            int    begin  = tmpstr.indexOf("url_encoded_fmt_stream_map=");
-
-            if (begin != -1) {
-                int end = tmpstr.indexOf("&", begin + 27);
-
-                if (end == -1) {
-                    end = tmpstr.length();
-                }
-
-                Vector url_encoded_fmt_stream_map = new Vector();
-
-                tmpstr = UtilClass.URLDecode(tmpstr.substring(begin + 27, end));
-
-                begin = 0;
-                end   = tmpstr.indexOf(",");
-
-                while (end != -1) {
-                    url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, end));
-
-                    begin = end + 1;
-                    end   = tmpstr.indexOf(",", begin);
-                }
-
-                url_encoded_fmt_stream_map.addElement(tmpstr.substring(begin, tmpstr.length()));
-
-                result = new Vector();
-
-                Enumeration url_encoded_fmt_stream_map_enum = url_encoded_fmt_stream_map.elements();
-
-                while (url_encoded_fmt_stream_map_enum.hasMoreElements()) {
-                    tmpstr = (String)url_encoded_fmt_stream_map_enum.nextElement();
-
-                    begin = tmpstr.indexOf("itag=");
-
-                    if (begin != -1) {
-                        end = tmpstr.indexOf("&", begin + 5);
-
-                        if (end == -1) {
-                            end = tmpstr.length();
-                        }
-
-                        result.addElement(Integer.valueOf(tmpstr.substring(begin + 5, end)));
-                    }
-                }
-            } else {
-                result = null;
-            }
-        } catch (Exception ex) {
-            result = null;
-        } finally {
-            if (stream_reader != null) {
-                try {
-                    stream_reader.close();
-                } catch (Exception ex) {
-                    // Ignore
-                }
-            }
-            if (stream != null) {
-                try {
-                    stream.close();
-                } catch (Exception ex) {
-                    // Ignore
-                }
-            }
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (Exception ex) {
-                    // Ignore
-                }
-            }
-        }
-
-        return result;
     }
 
     public static Image LoadImageFromURL(String url) {

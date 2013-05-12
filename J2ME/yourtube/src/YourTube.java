@@ -215,7 +215,7 @@ public class YourTube extends MIDlet implements CommandListener {
         String youtube_video_names[];
         Vector youtube_videos;
 
-        youtube_videos = SearchClass.GetSearchResults();
+        youtube_videos = APIClass.GetSearchResults();
 
         if (youtube_videos != null) {
             youtube_video_names = new String[youtube_videos.size()];
@@ -596,7 +596,7 @@ public class YourTube extends MIDlet implements CommandListener {
                                     try {
                                         ShowProgressMessage("Searching YouTube...");
 
-                                        SearchClass.MakeSearch(search_string);
+                                        APIClass.MakeSearch(search_string);
 
                                         ShowSearchForm();
                                     } catch (Exception ex) {
@@ -612,7 +612,7 @@ public class YourTube extends MIDlet implements CommandListener {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
 
                     if (SearchSearchResultsChoiceGroup.getSelectedIndex() != -1) {
-                        final VideoClass youtube_video = (VideoClass)(SearchClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
+                        final VideoClass youtube_video = (VideoClass)(APIClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
 
                         if (BgOperationThread == null || !BgOperationThread.isAlive()) {
                             BgOperationThread = new Thread() {
@@ -632,14 +632,14 @@ public class YourTube extends MIDlet implements CommandListener {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
 
                     if (SearchSearchResultsChoiceGroup.getSelectedIndex() != -1) {
-                        final VideoClass youtube_video = (VideoClass)(SearchClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
+                        final VideoClass youtube_video = (VideoClass)(APIClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
 
                         if (BgOperationThread == null || !BgOperationThread.isAlive()) {
                             BgOperationThread = new Thread() {
                                 public void run() {
                                     ShowProgressMessage("Loading video properties...");
 
-                                    Vector available_formats = UtilClass.GetAvailableFormats(youtube_video.GetVideoId());
+                                    Vector available_formats = APIClass.GetAvailableFormats(youtube_video.GetVideoId());
 
                                     if (available_formats != null) {
                                         AvailableVideoFormatNames      = new Vector();
@@ -705,7 +705,7 @@ public class YourTube extends MIDlet implements CommandListener {
                                 try {
                                     SettingStorageClass.SetVideoFormatId(((Integer)AvailableVideoFormatIds.elementAt(DownloadVideoFormatChoiceGroup.getSelectedIndex())).intValue());
 
-                                    VideoClass youtube_video = (VideoClass)(SearchClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
+                                    VideoClass youtube_video = (VideoClass)(APIClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
 
                                     DownloadClass download = new DownloadClass(DownloadClass.STATE_QUEUED,
                                                                                ((Integer)AvailableVideoFormatIds.elementAt(DownloadVideoFormatChoiceGroup.getSelectedIndex())).intValue(),
