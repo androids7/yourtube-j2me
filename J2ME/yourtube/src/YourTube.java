@@ -26,7 +26,7 @@ public class YourTube extends MIDlet implements CommandListener {
     private static final Command CMD_ABOUT         = new Command("About",            Command.SCREEN, 2);
     private static final Command CMD_EXIT          = new Command("Exit",             Command.EXIT,   2);
 
-    private static final String BIG_APPLICATION_ICON = "/icons/icon-big.png";
+    private static final String APP_ABOUT_ICON = "/icons/icon-about.png";
 
     private static final String VIDEO_FORMAT_NAMES[]      = {"MP4 (H.264 720p HD)", "MP4 (H.264 360p)", "FLV (H.264 480p)", "FLV (H.264 360p)", "FLV (H.263 240p)", "3GP (MPEG-4 240p)", "3GP (MPEG-4 144p)"};
     private static final String VIDEO_FORMAT_EXTENSIONS[] = {"mp4",                 "mp4",              "flv",              "flv",              "flv",              "3gp",               "3gp"};
@@ -180,7 +180,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
         AboutForm = new Form("About");
         try {
-            ImageItem icon = new ImageItem(null, Image.createImage(BIG_APPLICATION_ICON),
+            ImageItem icon = new ImageItem(null, Image.createImage(APP_ABOUT_ICON),
                                            Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER, null);
 
             AboutForm.append(icon);
