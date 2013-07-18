@@ -10,21 +10,22 @@ public class YourTube extends MIDlet implements CommandListener {
     private static final int APP_DESTROYED = 2;
 
     private static final Command CMD_OK            = new Command("OK",               Command.OK,     1);
-    private static final Command CMD_CANCEL        = new Command("Cancel",           Command.CANCEL, 1);
     private static final Command CMD_BACK          = new Command("Back",             Command.BACK,   1);
-    private static final Command CMD_SAVE          = new Command("Save",             Command.SCREEN, 1);
+    private static final Command CMD_EXIT          = new Command("Exit",             Command.EXIT,   2);
+
     private static final Command CMD_REFRESH       = new Command("Refresh",          Command.SCREEN, 1);
 
-    private static final Command CMD_SEARCH        = new Command("Search",           Command.SCREEN, 2);
-    private static final Command CMD_PROPERTIES    = new Command("Video Properties", Command.SCREEN, 2);
+    private static final Command CMD_SEARCH        = new Command("Search",           Command.OK,     1);
     private static final Command CMD_DOWNLOAD      = new Command("Download",         Command.SCREEN, 2);
-    private static final Command CMD_DELETE        = new Command("Delete",           Command.ITEM,   2);
+    private static final Command CMD_PROPERTIES    = new Command("Video Properties", Command.SCREEN, 2);
     private static final Command CMD_DOWNLOADSCR   = new Command("Downloads Screen", Command.SCREEN, 2);
+
+    private static final Command CMD_DELETE        = new Command("Delete",           Command.ITEM,   1);
     private static final Command CMD_SEARCHSCR     = new Command("Search Screen",    Command.SCREEN, 2);
+    
     private static final Command CMD_SETTINGS      = new Command("Settings",         Command.SCREEN, 2);
-    private static final Command CMD_HELP          = new Command("Help",             Command.SCREEN, 2);
     private static final Command CMD_ABOUT         = new Command("About",            Command.SCREEN, 2);
-    private static final Command CMD_EXIT          = new Command("Exit",             Command.EXIT,   2);
+    private static final Command CMD_HELP          = new Command("Help",             Command.HELP,   2);
 
     private static final String APP_ABOUT_ICON = "/icons/icon-about.png";
 
@@ -239,12 +240,12 @@ public class YourTube extends MIDlet implements CommandListener {
         SearchForm.append(SearchSearchStringTextField);
         SearchForm.append(SearchSearchResultsChoiceGroup);
         SearchForm.addCommand(CMD_SEARCH);
-        SearchForm.addCommand(CMD_PROPERTIES);
         SearchForm.addCommand(CMD_DOWNLOAD);
+        SearchForm.addCommand(CMD_PROPERTIES);
         SearchForm.addCommand(CMD_DOWNLOADSCR);
         SearchForm.addCommand(CMD_SETTINGS);
-        SearchForm.addCommand(CMD_HELP);
         SearchForm.addCommand(CMD_ABOUT);
+        SearchForm.addCommand(CMD_HELP);
         SearchForm.addCommand(CMD_EXIT);
         SearchForm.setCommandListener(this);
 
@@ -376,7 +377,7 @@ public class YourTube extends MIDlet implements CommandListener {
         DownloadForm.append(DownloadFileNameTextField);
         DownloadForm.append(DownloadVideoFormatChoiceGroup);
         DownloadForm.addCommand(CMD_OK);
-        DownloadForm.addCommand(CMD_CANCEL);
+        DownloadForm.addCommand(CMD_BACK);
         DownloadForm.setCommandListener(this);
 
         Display.getDisplay(this).setCurrent(DownloadForm);
@@ -405,8 +406,8 @@ public class YourTube extends MIDlet implements CommandListener {
                 DownloadsList.addCommand(CMD_DELETE);
                 DownloadsList.addCommand(CMD_SEARCHSCR);
                 DownloadsList.addCommand(CMD_SETTINGS);
-                DownloadsList.addCommand(CMD_HELP);
                 DownloadsList.addCommand(CMD_ABOUT);
+                DownloadsList.addCommand(CMD_HELP);
                 DownloadsList.addCommand(CMD_EXIT);
                 DownloadsList.setCommandListener(this);
 
@@ -466,7 +467,7 @@ public class YourTube extends MIDlet implements CommandListener {
         DeleteDownloadForm = new Form(header);
         DeleteDownloadForm.append(text);
         DeleteDownloadForm.addCommand(CMD_OK);
-        DeleteDownloadForm.addCommand(CMD_CANCEL);
+        DeleteDownloadForm.addCommand(CMD_BACK);
         DeleteDownloadForm.setCommandListener(this);
 
         Display.getDisplay(this).setCurrent(DeleteDownloadForm);
@@ -508,7 +509,7 @@ public class YourTube extends MIDlet implements CommandListener {
         SettingsForm = new Form("Settings");
         SettingsForm.append(SettingsPreviewFormatChoiceGroup);
         SettingsForm.append(SettingsDstFSRootChoiceGroup);
-        SettingsForm.addCommand(CMD_SAVE);
+        SettingsForm.addCommand(CMD_OK);
         SettingsForm.addCommand(CMD_BACK);
         SettingsForm.setCommandListener(this);
 
@@ -524,7 +525,15 @@ public class YourTube extends MIDlet implements CommandListener {
                         DownloadStorageClass.Initialize();
                         DownloaderClass.Initialize();
 
-                        ShowSearchForm();
+                        if (SettingStorageClass.GetShowSettingsOnLaunch()) {
+                            SettingStorageClass.SetShowSettingsOnLaunch(false);
+                            
+                            LastDisplayable = null;
+                            
+                            ShowSettingsForm();
+                        } else {
+                            ShowSearchForm();
+                        }
 
                         StartDownloadsListUpdate();
                     } catch (Exception ex) {
@@ -608,26 +617,6 @@ public class YourTube extends MIDlet implements CommandListener {
                             BgOperationThread.start();
                         }
                     }
-                } else if (command == CMD_PROPERTIES) {
-                    SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
-
-                    if (SearchSearchResultsChoiceGroup.getSelectedIndex() != -1) {
-                        final VideoClass youtube_video = (VideoClass)(APIClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
-
-                        if (BgOperationThread == null || !BgOperationThread.isAlive()) {
-                            BgOperationThread = new Thread() {
-                                public void run() {
-                                    ShowProgressMessage("Loading video properties...");
-
-                                    Image video_thumbnail = UtilClass.LoadImageFromURL(youtube_video.GetThumbnailURL());
-
-                                    ShowPropertiesForm(youtube_video, video_thumbnail);
-                                }
-                            };
-
-                            BgOperationThread.start();
-                        }
-                    }
                 } else if (command == CMD_DOWNLOAD) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
 
@@ -668,6 +657,26 @@ public class YourTube extends MIDlet implements CommandListener {
                             BgOperationThread.start();
                         }
                     }
+                } else if (command == CMD_PROPERTIES) {
+                    SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
+
+                    if (SearchSearchResultsChoiceGroup.getSelectedIndex() != -1) {
+                        final VideoClass youtube_video = (VideoClass)(APIClass.GetSearchResults().elementAt(SearchSearchResultsChoiceGroup.getSelectedIndex()));
+
+                        if (BgOperationThread == null || !BgOperationThread.isAlive()) {
+                            BgOperationThread = new Thread() {
+                                public void run() {
+                                    ShowProgressMessage("Loading video properties...");
+
+                                    Image video_thumbnail = UtilClass.LoadImageFromURL(youtube_video.GetThumbnailURL());
+
+                                    ShowPropertiesForm(youtube_video, video_thumbnail);
+                                }
+                            };
+
+                            BgOperationThread.start();
+                        }
+                    }
                 } else if (command == CMD_DOWNLOADSCR) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
 
@@ -677,16 +686,16 @@ public class YourTube extends MIDlet implements CommandListener {
                     LastDisplayable            = Display.getDisplay(this).getCurrent();
 
                     ShowSettingsForm();
-                } else if (command == CMD_HELP) {
-                    SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
-                    LastDisplayable            = Display.getDisplay(this).getCurrent();
-
-                    ShowHelpForm();
                 } else if (command == CMD_ABOUT) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
                     LastDisplayable            = Display.getDisplay(this).getCurrent();
 
                     ShowAboutForm();
+                } else if (command == CMD_HELP) {
+                    SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
+                    LastDisplayable            = Display.getDisplay(this).getCurrent();
+
+                    ShowHelpForm();
                 }
             } else if (displayable.equals(PropertiesForm)) {
                 if (command == CMD_BACK) {
@@ -735,7 +744,7 @@ public class YourTube extends MIDlet implements CommandListener {
                             ShowErrorMessage("No video format selected");
                         }
                     }
-                } else if (command == CMD_CANCEL) {
+                } else if (command == CMD_BACK) {
                     ShowSearchForm();
                 }
             } else if (displayable.equals(DownloadsList)) {
@@ -752,14 +761,14 @@ public class YourTube extends MIDlet implements CommandListener {
                     LastDisplayable = Display.getDisplay(this).getCurrent();
 
                     ShowSettingsForm();
-                } else if (command == CMD_HELP) {
-                    LastDisplayable = Display.getDisplay(this).getCurrent();
-
-                    ShowHelpForm();
                 } else if (command == CMD_ABOUT) {
                     LastDisplayable = Display.getDisplay(this).getCurrent();
 
                     ShowAboutForm();
+                } else if (command == CMD_HELP) {
+                    LastDisplayable = Display.getDisplay(this).getCurrent();
+
+                    ShowHelpForm();
                 }
             } else if (displayable.equals(DeleteDownloadForm)) {
                 if (command == CMD_OK) {
@@ -774,13 +783,13 @@ public class YourTube extends MIDlet implements CommandListener {
                             ShowErrorMessage(ex.toString());
                         }
                     }
-                } else if (command == CMD_CANCEL) {
+                } else if (command == CMD_BACK) {
                     ShowDownloadsList();
 
                     ResumeDownloadsListUpdate();
                 }
             } else if (displayable.equals(SettingsForm)) {
-                if (command == CMD_SAVE) {
+                if (command == CMD_OK) {
                     if (SettingsPreviewFormatChoiceGroup.getSelectedIndex() != -1) {
                         if (SettingsDstFSRootChoiceGroup.getSelectedIndex() != -1) {
                             try {
