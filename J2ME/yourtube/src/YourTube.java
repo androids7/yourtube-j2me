@@ -9,23 +9,23 @@ public class YourTube extends MIDlet implements CommandListener {
     private static final int APP_ACTIVE    = 1;
     private static final int APP_DESTROYED = 2;
 
-    private static final Command CMD_OK            = new Command("OK",               Command.OK,     1);
-    private static final Command CMD_BACK          = new Command("Back",             Command.BACK,   1);
-    private static final Command CMD_EXIT          = new Command("Exit",             Command.EXIT,   2);
+    private static final Command CMD_OK               = new Command("OK",               Command.OK,     1);
+    private static final Command CMD_BACK             = new Command("Back",             Command.BACK,   1);
+    private static final Command CMD_EXIT             = new Command("Exit",             Command.EXIT,   2);
 
-    private static final Command CMD_REFRESH       = new Command("Refresh",          Command.SCREEN, 1);
+    private static final Command CMD_REFRESH          = new Command("Refresh",          Command.SCREEN, 1);
 
-    private static final Command CMD_SEARCH        = new Command("Search",           Command.OK,     1);
-    private static final Command CMD_DOWNLOAD      = new Command("Download",         Command.SCREEN, 2);
-    private static final Command CMD_PROPERTIES    = new Command("Video Properties", Command.SCREEN, 2);
-    private static final Command CMD_DOWNLOADSCR   = new Command("Downloads Screen", Command.SCREEN, 2);
+    private static final Command CMD_SEARCH           = new Command("Search",           Command.OK,     1);
+    private static final Command CMD_DOWNLOAD         = new Command("Download",         Command.SCREEN, 2);
+    private static final Command CMD_PROPERTIES       = new Command("Video Properties", Command.SCREEN, 2);
+    private static final Command CMD_DOWNLOADS_SCREEN = new Command("Downloads Screen", Command.SCREEN, 2);
 
-    private static final Command CMD_DELETE        = new Command("Delete",           Command.ITEM,   1);
-    private static final Command CMD_SEARCHSCR     = new Command("Search Screen",    Command.SCREEN, 2);
+    private static final Command CMD_DELETE           = new Command("Delete",           Command.ITEM,   1);
+    private static final Command CMD_SEARCH_SCREEN    = new Command("Search Screen",    Command.SCREEN, 2);
     
-    private static final Command CMD_SETTINGS      = new Command("Settings",         Command.SCREEN, 2);
-    private static final Command CMD_ABOUT         = new Command("About",            Command.SCREEN, 2);
-    private static final Command CMD_HELP          = new Command("Help",             Command.HELP,   2);
+    private static final Command CMD_SETTINGS         = new Command("Settings",         Command.SCREEN, 2);
+    private static final Command CMD_ABOUT            = new Command("About",            Command.SCREEN, 2);
+    private static final Command CMD_HELP             = new Command("Help",             Command.HELP,   2);
 
     private static final String APP_ABOUT_ICON = "/icons/icon-about.png";
 
@@ -242,7 +242,7 @@ public class YourTube extends MIDlet implements CommandListener {
         SearchForm.addCommand(CMD_SEARCH);
         SearchForm.addCommand(CMD_DOWNLOAD);
         SearchForm.addCommand(CMD_PROPERTIES);
-        SearchForm.addCommand(CMD_DOWNLOADSCR);
+        SearchForm.addCommand(CMD_DOWNLOADS_SCREEN);
         SearchForm.addCommand(CMD_SETTINGS);
         SearchForm.addCommand(CMD_ABOUT);
         SearchForm.addCommand(CMD_HELP);
@@ -404,7 +404,7 @@ public class YourTube extends MIDlet implements CommandListener {
                 DownloadsList.setFitPolicy(List.TEXT_WRAP_ON);
 
                 DownloadsList.addCommand(CMD_DELETE);
-                DownloadsList.addCommand(CMD_SEARCHSCR);
+                DownloadsList.addCommand(CMD_SEARCH_SCREEN);
                 DownloadsList.addCommand(CMD_SETTINGS);
                 DownloadsList.addCommand(CMD_ABOUT);
                 DownloadsList.addCommand(CMD_HELP);
@@ -677,7 +677,7 @@ public class YourTube extends MIDlet implements CommandListener {
                             BgOperationThread.start();
                         }
                     }
-                } else if (command == CMD_DOWNLOADSCR) {
+                } else if (command == CMD_DOWNLOADS_SCREEN) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
 
                     ShowDownloadsList();
@@ -755,7 +755,7 @@ public class YourTube extends MIDlet implements CommandListener {
                         ShowDeleteDownloadForm("Delete Download", "Delete download \"" +
                                                 DownloadStorageClass.GetCopy(DownloadsListIds[DownloadsList.getSelectedIndex()]).GetTitle() + "\" ?");
                     }
-                } else if (command == CMD_SEARCHSCR) {
+                } else if (command == CMD_SEARCH_SCREEN) {
                     ShowSearchForm();
                 } else if (command == CMD_SETTINGS) {
                     LastDisplayable = Display.getDisplay(this).getCurrent();
