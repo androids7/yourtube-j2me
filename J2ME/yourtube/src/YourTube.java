@@ -19,12 +19,11 @@ public class YourTube extends MIDlet implements CommandListener {
     private static final Command CMD_DOWNLOAD         = new Command("Download",         Command.SCREEN, 2);
     private static final Command CMD_PROPERTIES       = new Command("Video Properties", Command.SCREEN, 2);
     private static final Command CMD_DOWNLOADS_SCREEN = new Command("Downloads Screen", Command.SCREEN, 2);
-
-    private static final Command CMD_DELETE           = new Command("Delete",           Command.ITEM,   1);
-    
     private static final Command CMD_SETTINGS         = new Command("Settings",         Command.SCREEN, 2);
     private static final Command CMD_ABOUT            = new Command("About",            Command.SCREEN, 2);
     private static final Command CMD_HELP             = new Command("Help",             Command.HELP,   2);
+
+    private static final Command CMD_DELETE           = new Command("Delete",           Command.ITEM,   1);
 
     private static final String APP_ABOUT_ICON = "/icons/icon-about.png";
 
