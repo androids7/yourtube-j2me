@@ -21,7 +21,6 @@ public class YourTube extends MIDlet implements CommandListener {
     private static final Command CMD_DOWNLOADS_SCREEN = new Command("Downloads Screen", Command.SCREEN, 2);
 
     private static final Command CMD_DELETE           = new Command("Delete",           Command.ITEM,   1);
-    private static final Command CMD_SEARCH_SCREEN    = new Command("Search Screen",    Command.SCREEN, 2);
     
     private static final Command CMD_SETTINGS         = new Command("Settings",         Command.SCREEN, 2);
     private static final Command CMD_ABOUT            = new Command("About",            Command.SCREEN, 2);
@@ -56,7 +55,6 @@ public class YourTube extends MIDlet implements CommandListener {
     private Thread DownloadsListUpdateThread = null,
                    BgOperationThread = null;
 
-    private Displayable LastDisplayable = null;
     private Alert       InitErrorAlert = null,
                         ProgressAlert = null;
     private List        DownloadsList = null;
@@ -404,11 +402,7 @@ public class YourTube extends MIDlet implements CommandListener {
                 DownloadsList.setFitPolicy(List.TEXT_WRAP_ON);
 
                 DownloadsList.addCommand(CMD_DELETE);
-                DownloadsList.addCommand(CMD_SEARCH_SCREEN);
-                DownloadsList.addCommand(CMD_SETTINGS);
-                DownloadsList.addCommand(CMD_ABOUT);
-                DownloadsList.addCommand(CMD_HELP);
-                DownloadsList.addCommand(CMD_EXIT);
+                DownloadsList.addCommand(CMD_BACK);
                 DownloadsList.setCommandListener(this);
 
                 Display.getDisplay(this).setCurrent(DownloadsList);
@@ -528,8 +522,6 @@ public class YourTube extends MIDlet implements CommandListener {
                         if (SettingStorageClass.GetShowSettingsOnLaunch()) {
                             SettingStorageClass.SetShowSettingsOnLaunch(false);
                             
-                            LastDisplayable = null;
-                            
                             ShowSettingsForm();
                         } else {
                             ShowSearchForm();
@@ -573,23 +565,11 @@ public class YourTube extends MIDlet implements CommandListener {
                 // Ignore
             } else if (displayable.equals(AboutForm)) {
                 if (command == CMD_BACK) {
-                    if (LastDisplayable == SearchForm) {
-                        ShowSearchForm();
-                    } else if (LastDisplayable == DownloadsList) {
-                        ShowDownloadsList();
-                    } else {
-                        ShowSearchForm();
-                    }
+                    ShowSearchForm();
                 }
             } else if (displayable.equals(HelpForm)) {
                 if (command == CMD_BACK) {
-                    if (LastDisplayable == SearchForm) {
-                        ShowSearchForm();
-                    } else if (LastDisplayable == DownloadsList) {
-                        ShowDownloadsList();
-                    } else {
-                        ShowSearchForm();
-                    }
+                    ShowSearchForm();
                 }
             } else if (displayable.equals(SearchForm)) {
                 if (command == CMD_SEARCH) {
@@ -683,17 +663,14 @@ public class YourTube extends MIDlet implements CommandListener {
                     ShowDownloadsList();
                 } else if (command == CMD_SETTINGS) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
-                    LastDisplayable            = Display.getDisplay(this).getCurrent();
 
                     ShowSettingsForm();
                 } else if (command == CMD_ABOUT) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
-                    LastDisplayable            = Display.getDisplay(this).getCurrent();
 
                     ShowAboutForm();
                 } else if (command == CMD_HELP) {
                     SearchResultsSelectedIndex = SearchSearchResultsChoiceGroup.getSelectedIndex();
-                    LastDisplayable            = Display.getDisplay(this).getCurrent();
 
                     ShowHelpForm();
                 }
@@ -755,20 +732,8 @@ public class YourTube extends MIDlet implements CommandListener {
                         ShowDeleteDownloadForm("Delete Download", "Delete download \"" +
                                                 DownloadStorageClass.GetCopy(DownloadsListIds[DownloadsList.getSelectedIndex()]).GetTitle() + "\" ?");
                     }
-                } else if (command == CMD_SEARCH_SCREEN) {
+                } else if (command == CMD_BACK) {
                     ShowSearchForm();
-                } else if (command == CMD_SETTINGS) {
-                    LastDisplayable = Display.getDisplay(this).getCurrent();
-
-                    ShowSettingsForm();
-                } else if (command == CMD_ABOUT) {
-                    LastDisplayable = Display.getDisplay(this).getCurrent();
-
-                    ShowAboutForm();
-                } else if (command == CMD_HELP) {
-                    LastDisplayable = Display.getDisplay(this).getCurrent();
-
-                    ShowHelpForm();
                 }
             } else if (displayable.equals(DeleteDownloadForm)) {
                 if (command == CMD_OK) {
@@ -796,13 +761,7 @@ public class YourTube extends MIDlet implements CommandListener {
                                 SettingStorageClass.SetPreviewFormat(SettingsPreviewFormatChoiceGroup.getSelectedIndex());
                                 SettingStorageClass.SetDestinationDisk(SettingsDstFSRootChoiceGroup.getString(SettingsDstFSRootChoiceGroup.getSelectedIndex()));
 
-                                if (LastDisplayable == SearchForm) {
-                                    ShowSearchForm();
-                                } else if (LastDisplayable == DownloadsList) {
-                                    ShowDownloadsList();
-                                } else {
-                                    ShowSearchForm();
-                                }
+                                ShowSearchForm();
                             } catch (Exception ex) {
                                 ShowErrorMessage(ex.toString());
                             }
@@ -813,13 +772,7 @@ public class YourTube extends MIDlet implements CommandListener {
                         ShowErrorMessage("No preferred preview format selected");
                     }
                 } else if (command == CMD_BACK) {
-                    if (LastDisplayable == SearchForm) {
-                        ShowSearchForm();
-                    } else if (LastDisplayable == DownloadsList) {
-                        ShowDownloadsList();
-                    } else {
-                        ShowSearchForm();
-                    }
+                    ShowSearchForm();
                 }
             }
         }
