@@ -7,12 +7,11 @@
     <string name="dialog_title_loading_metadata">Loading video metadata</string>
     <string name="dialog_title_loading_video">Loading video</string>
     <string name="dialog_title_error">Error</string>
-    <string name="dialog_message_no_valid_formats">No valid video formats found</string>
-    <string name="dialog_title_info">Information</string>
-    <string name="dialog_message_operation_cancelled">Operation was cancelled by user</string>
+    <string name="toast_message_no_valid_formats">No valid video formats found</string>
+    <string name="toast_message_operation_cancelled">Operation was cancelled by user</string>
     <string name="button_ok">OK</string>
     <string name="dialog_title_choose_format">Choose desired video format</string>
-    <string name="dialog_message_download_complete">Download complete. Downloaded video was saved to Download folder on SD card</string>
+    <string name="toast_message_download_complete">Download complete. Downloaded video was saved to Download folder on SD card</string>
     <string name="action_home">Home</string>
     <string name="action_help">Help</string>
     <string name="uri_help">file:///android_asset/doc/help.html</string>

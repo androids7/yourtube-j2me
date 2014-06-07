@@ -21,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
 import android.webkit.WebSettings;
+import android.widget.Toast;
 
 import com.derevenetz.oleg.yourtube.CustomDialogFragment;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment.CustomDialogFragmentListener;
@@ -277,13 +278,13 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     			if (itags.size() != 0) {
     				ShowFormatSelectionDialog(video_title, itags, formats, extensions, urls);
     			} else {
-        			ShowMessageDialog(getString(R.string.dialog_title_error), getString(R.string.dialog_message_no_valid_formats));
+    				ShowToast(getString(R.string.toast_message_no_valid_formats));
     			}
     		} else {
-    			ShowMessageDialog(getString(R.string.dialog_title_error), getString(R.string.dialog_message_no_valid_formats));
+				ShowToast(getString(R.string.toast_message_no_valid_formats));
     		}
     	} else {
-    		ShowMessageDialog(getString(R.string.dialog_title_info), getString(R.string.dialog_message_operation_cancelled));
+    		ShowToast(getString(R.string.toast_message_operation_cancelled));
     	}
     }
     
@@ -303,13 +304,17 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	
     	if (error_message != null) {
     		if (error_message.equals("")) {
-        		ShowMessageDialog(getString(R.string.dialog_title_info), getString(R.string.dialog_message_download_complete));
+    			ShowToast(getString(R.string.toast_message_download_complete));
     		} else {
     			ShowMessageDialog(getString(R.string.dialog_title_error), error_message);
     		}
     	} else {
-    		ShowMessageDialog(getString(R.string.dialog_title_info), getString(R.string.dialog_message_operation_cancelled));
+    		ShowToast(getString(R.string.toast_message_operation_cancelled));
     	}
+    }
+    
+    private void ShowToast(String message) {
+    	Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
     
     private void ShowMessageDialog(String title, String message) {
