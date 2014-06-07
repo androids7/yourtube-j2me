@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">YouTube Downloader</string>
+    <string name="action_download">Download</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="dialog_title_loading_metadata">Loading Video Metadata</string>
+    <string name="dialog_title_loading_video">Loading Video</string>
+    <string name="dialog_title_error">Error</string>
+    <string name="dialog_message_no_valid_formats">No valid video formats found</string>
+    <string name="dialog_title_info">Information</string>
+    <string name="dialog_message_operation_cancelled">Operation was cancelled by user</string>
+    <string name="button_ok">OK</string>
+    <string name="dialog_title_choose_format">Choose desired video format</string>
+    <string name="dialog_message_download_complete">Download complete. Downloaded video was saved to Download folder on SD card</string>
+    <string name="action_home">Home</string>
+
+</resources>
