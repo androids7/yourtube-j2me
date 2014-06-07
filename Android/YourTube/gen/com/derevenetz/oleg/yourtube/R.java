@@ -30,12 +30,13 @@ public final class R {
         public static final int ic_launcher=0x7f020005;
     }
     public static final class id {
-        public static final int action_download=0x7f080002;
-        public static final int action_help=0x7f080005;
-        public static final int action_home=0x7f080004;
-        public static final int action_refresh=0x7f080003;
-        public static final int container=0x7f080000;
-        public static final int webview=0x7f080001;
+        public static final int action_download=0x7f080003;
+        public static final int action_help=0x7f080006;
+        public static final int action_home=0x7f080005;
+        public static final int action_refresh=0x7f080004;
+        public static final int activity_yourtube=0x7f080000;
+        public static final int fragment_main=0x7f080001;
+        public static final int webview=0x7f080002;
     }
     public static final class layout {
         public static final int activity_yourtube=0x7f030000;
@@ -46,19 +47,18 @@ public final class R {
     }
     public static final class string {
         public static final int action_download=0x7f050001;
-        public static final int action_help=0x7f05000c;
-        public static final int action_home=0x7f05000b;
+        public static final int action_help=0x7f050004;
+        public static final int action_home=0x7f050003;
         public static final int action_refresh=0x7f050002;
         public static final int app_name=0x7f050000;
-        public static final int button_ok=0x7f050008;
-        public static final int dialog_title_choose_format=0x7f050009;
-        public static final int dialog_title_error=0x7f050005;
-        public static final int dialog_title_loading_metadata=0x7f050003;
-        public static final int dialog_title_loading_video=0x7f050004;
-        public static final int toast_message_download_complete=0x7f05000a;
-        public static final int toast_message_no_valid_formats=0x7f050006;
-        public static final int toast_message_operation_cancelled=0x7f050007;
-        public static final int uri_help=0x7f05000d;
+        public static final int button_ok=0x7f05000b;
+        public static final int dialog_title_choose_format=0x7f050006;
+        public static final int dialog_title_loading_metadata=0x7f050005;
+        public static final int toast_message_download_failed=0x7f05000a;
+        public static final int toast_message_download_started=0x7f050009;
+        public static final int toast_message_no_valid_formats=0x7f050007;
+        public static final int toast_message_operation_cancelled=0x7f050008;
+        public static final int uri_help=0x7f05000c;
     }
     public static final class style {
         /** 

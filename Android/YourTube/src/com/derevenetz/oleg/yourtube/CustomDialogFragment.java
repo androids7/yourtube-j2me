@@ -12,12 +12,10 @@ import android.os.Bundle;
 public class CustomDialogFragment extends DialogFragment {
 	private static final int TYPE_MESSAGE           = 0;
 	private static final int TYPE_PROGRESS_METADATA = 1;
-	private static final int TYPE_PROGRESS_VIDEO    = 2;
-	private static final int TYPE_FORMAT_SELECTION  = 3;
+	private static final int TYPE_FORMAT_SELECTION  = 2;
 
 	public static interface CustomDialogFragmentListener {
 		public abstract void onMetadataProgressCancelled();
-		public abstract void onVideoProgressCancelled();
 		public abstract void onFormatSelected(String video_title, String itag, String extension, String url);
 	}
 	
@@ -41,18 +39,6 @@ public class CustomDialogFragment extends DialogFragment {
 		Bundle args = new Bundle();
 		
 		args.putInt("type", TYPE_PROGRESS_METADATA);
-		
-		fragment.setArguments(args);
-		
-		return fragment;
-	}
-	
-	public static CustomDialogFragment newVideoProgressInstance() {
-		CustomDialogFragment fragment = new CustomDialogFragment();
-		
-		Bundle args = new Bundle();
-		
-		args.putInt("type", TYPE_PROGRESS_VIDEO);
 		
 		fragment.setArguments(args);
 		
@@ -90,15 +76,6 @@ public class CustomDialogFragment extends DialogFragment {
     		
 			dialog.setMessage(getString(R.string.dialog_title_loading_metadata));
 			dialog.setIndeterminate(true);
-			dialog.setCancelable(true);
-
-			return dialog;
-		} else if (getArguments().getInt("type") == TYPE_PROGRESS_VIDEO) {
-    		final ProgressDialog dialog = new ProgressDialog(getActivity());
-    		
-			dialog.setMessage(getString(R.string.dialog_title_loading_video));
-			dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-			dialog.setIndeterminate(false);
 			dialog.setCancelable(true);
 
 			return dialog;
@@ -152,8 +129,6 @@ public class CustomDialogFragment extends DialogFragment {
 		
 		if (getArguments().getInt("type") == TYPE_PROGRESS_METADATA) {
 			activity.onMetadataProgressCancelled();
-		} else if (getArguments().getInt("type") == TYPE_PROGRESS_VIDEO) {
-			activity.onVideoProgressCancelled();
 		}
 	}
 
@@ -165,8 +140,6 @@ public class CustomDialogFragment extends DialogFragment {
 		
 		if (getArguments().getInt("type") == TYPE_PROGRESS_METADATA) {
 			activity.onMetadataProgressCancelled();
-		} else if (getArguments().getInt("type") == TYPE_PROGRESS_VIDEO) {
-			activity.onVideoProgressCancelled();
 		}
 	}
 }

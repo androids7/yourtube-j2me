@@ -7,8 +7,9 @@ import java.util.regex.Matcher;
 
 import android.app.Activity;
 import android.app.DialogFragment;
+import android.app.DownloadManager;
+import android.app.DownloadManager.Request;
 import android.app.Fragment;
-import android.app.ProgressDialog;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -20,19 +21,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.webkit.WebSettings;
+import android.webkit.WebViewClient;
 import android.widget.Toast;
 
 import com.derevenetz.oleg.yourtube.CustomDialogFragment;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment.CustomDialogFragmentListener;
 import com.derevenetz.oleg.yourtube.MetadataDownloader;
 import com.derevenetz.oleg.yourtube.MetadataDownloader.MetadataDownloaderListener;
-import com.derevenetz.oleg.yourtube.VideoDownloader;
-import com.derevenetz.oleg.yourtube.VideoDownloader.VideoDownloaderListener;
 
-public class YourTubeActivity extends Activity implements MetadataDownloaderListener, VideoDownloaderListener, CustomDialogFragmentListener {
+public class YourTubeActivity extends Activity implements MetadataDownloaderListener, CustomDialogFragmentListener {
 	private MetadataDownloader metadataDownloader = null;
-	private VideoDownloader    videoDownloader    = null;
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +39,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         setContentView(R.layout.activity_yourtube);
 
         if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction().add(R.id.container, new MainFragment()).commit();
+            getFragmentManager().beginTransaction().add(R.id.activity_yourtube, new MainFragment()).commit();
         }
     }
 
@@ -95,9 +93,9 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         				                                                                                .appendQueryParameter("gl", "US")
         				                                                                                .appendQueryParameter("hl", "en");
         				
-        				ShowMetadataProgressDialog();
-
         				if (metadataDownloader == null) {
+            				ShowMetadataProgressDialog();
+
             				metadataDownloader = new MetadataDownloader(this); 
             				metadataDownloader.execute(builder.build().toString());
         				}
@@ -157,13 +155,6 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
     
     @Override
-    public void onVideoProgressCancelled() {
-		if (videoDownloader != null) {
-    		videoDownloader.cancel(true);
-		}
-    }
-    
-    @Override
     public void onFormatSelected(String video_title, String itag, String extension, String url) {
     	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
     	
@@ -189,19 +180,26 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	
     	file_name = file_name + "." + extension;
     
-    	Bundle downloader_params = new Bundle();
+		DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+		
+		if (manager != null) {
+			Request request = new Request(Uri.parse(url));
 
-    	downloader_params.putString("url",         url);
-    	downloader_params.putString("output_dir",  Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).getAbsolutePath());
-    	downloader_params.putString("output_file", file_name);
-    	
-		ShowVideoProgressDialog();
+			request.setDescription(file_name);
+			request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, file_name);
+			request.allowScanningByMediaScanner();
+			
+			try {
+				manager.enqueue(request);
 
-		if (videoDownloader == null) {
-			videoDownloader = new VideoDownloader(this); 
-			videoDownloader.execute(downloader_params);
+				ShowToast(getString(R.string.toast_message_download_started));
+			} catch (Exception ex) {
+				ShowToast(getString(R.string.toast_message_download_failed));
+			}
+		} else {
+			ShowToast(getString(R.string.toast_message_download_failed));
 		}
-}
+    }
     
     @Override
     public void onMetadataDownloadComplete(String metadata) {
@@ -288,47 +286,10 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	}
     }
     
-    public void onVideoDownloadProgressUpdate(int percent) {
-    	DialogFragment fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (fragment != null && (ProgressDialog)fragment.getDialog() != null) {
-			((ProgressDialog)fragment.getDialog()).setProgress(percent);
-    	}
-    }
-    
-    @Override
-    public void onVideoDownloadComplete(String error_message) {
-    	videoDownloader = null;
-    	
-    	DismissDialog();
-    	
-    	if (error_message != null) {
-    		if (error_message.equals("")) {
-    			ShowToast(getString(R.string.toast_message_download_complete));
-    		} else {
-    			ShowMessageDialog(getString(R.string.dialog_title_error), error_message);
-    		}
-    	} else {
-    		ShowToast(getString(R.string.toast_message_operation_cancelled));
-    	}
-    }
-    
     private void ShowToast(String message) {
     	Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
     
-    private void ShowMessageDialog(String title, String message) {
-    	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (prev_fragment != null) {
-    		prev_fragment.dismiss();
-    	}
-    	
-    	DialogFragment fragment = CustomDialogFragment.newMessageInstance(title, message);
-    	
-    	fragment.show(getFragmentManager(), "dialog");
-    }
-
     private void ShowMetadataProgressDialog() {
     	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
     	
@@ -337,18 +298,6 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	}
     	
     	DialogFragment fragment = CustomDialogFragment.newMetadataProgressInstance();
-    	
-    	fragment.show(getFragmentManager(), "dialog");
-    }
-
-    private void ShowVideoProgressDialog() {
-    	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (prev_fragment != null) {
-    		prev_fragment.dismiss();
-    	}
-    	
-    	DialogFragment fragment = CustomDialogFragment.newVideoProgressInstance();
     	
     	fragment.show(getFragmentManager(), "dialog");
     }
@@ -379,16 +328,26 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View root_view = inflater.inflate(R.layout.fragment_main, container, false);
+            View    root_view = inflater.inflate(R.layout.fragment_main, container, false);
+            WebView web_view  = (WebView)root_view.findViewById(R.id.webview);
 
-            WebView     web_view     = (WebView)root_view.findViewById(R.id.webview);
-            WebSettings web_settings = web_view.getSettings();
+            web_view.getSettings().setJavaScriptEnabled(true);
+        	web_view.setWebViewClient(new WebViewClient());
             
-            web_settings.setJavaScriptEnabled(true);
-            
-            web_view.loadUrl("http://m.youtube.com/");
+            if (savedInstanceState != null) {
+            	web_view.restoreState(savedInstanceState);
+            } else {
+                web_view.loadUrl("http://m.youtube.com/");
+            }
 
-            return root_view;
+        	return root_view;
+        }
+        
+        @Override
+        public void onSaveInstanceState (Bundle outState) {
+        	super.onSaveInstanceState(outState);
+        	
+        	((WebView)getView().findViewById(R.id.webview)).saveState(outState);
         }
     }
 }
