@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">YouTube Downloader</string>
+    <string name="action_download">Скачать</string>
+    <string name="action_refresh">Обновить</string>
+    <string name="dialog_title_loading_metadata">Загружаются данные видео</string>
+    <string name="dialog_title_loading_video">Загружается видео</string>
+    <string name="dialog_title_error">Ошибка</string>
+    <string name="dialog_message_no_valid_formats">Нет подходящих видеоформатов</string>
+    <string name="dialog_title_info">Информация</string>
+    <string name="dialog_message_operation_cancelled">Операция отменена пользователем</string>
+    <string name="button_ok">OK</string>
+    <string name="dialog_title_choose_format">Выберите формат видео</string>
+    <string name="dialog_message_download_complete">Загрузка завершена. Загруженное видео было сохранено в папку Download на SD-карте</string>
+    <string name="action_home">Домой</string>
+    <string name="action_help">Справка</string>
+    <string name="uri_help">file:///android_asset/doc/help_ru.html</string>
+
+</resources>

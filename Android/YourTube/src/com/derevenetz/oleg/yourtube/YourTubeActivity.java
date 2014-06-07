@@ -121,6 +121,14 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         	}
         	
             return true;
+        } else if (id == R.id.action_help) {
+        	WebView web_view = (WebView)findViewById(R.id.webview);
+
+        	if (web_view != null) {
+        		web_view.loadUrl(getString(R.string.uri_help));
+        	}
+        	
+            return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -130,7 +138,8 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     public boolean onKeyDown(int keyCode, KeyEvent event) {
     	WebView web_view = (WebView)findViewById(R.id.webview);
     	
-    	if ((keyCode == KeyEvent.KEYCODE_BACK) && web_view != null && web_view.canGoBack()) {
+    	if ((keyCode == KeyEvent.KEYCODE_BACK) && web_view != null && web_view.canGoBack() &&
+    			                                !(web_view.getUrl().equals("http://m.youtube.com/") && web_view.copyBackForwardList().getCurrentIndex() <= 1)) {
     		web_view.goBack();
     		
     		return true;
