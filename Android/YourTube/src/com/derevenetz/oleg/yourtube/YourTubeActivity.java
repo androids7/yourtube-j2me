@@ -44,12 +44,51 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
 
     @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+    	super.onRestoreInstanceState(savedInstanceState);
+    	
+    	if (savedInstanceState.getBoolean("YourTubeActivity.metadataDownloaderRunning", false)) {
+			if (metadataDownloader == null) {
+				String url = savedInstanceState.getString ("YourTubeActivity.metadataDownloaderURL", "");
+				
+				showMetadataProgressDialog();
+
+				metadataDownloader = new MetadataDownloader(url, this);
+				metadataDownloader.execute(url);
+			}
+    	}
+    }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+    	if (metadataDownloader != null) {
+    		dismissDialog();
+    	}
+    	
+    	super.onSaveInstanceState(outState);
+    	
+    	if (metadataDownloader != null) {
+    		outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", true);
+    		outState.putString ("YourTubeActivity.metadataDownloaderURL",     metadataDownloader.getUrl());
+
+			metadataDownloader.setListener(null);
+    		metadataDownloader.cancel(true);
+    		
+    		metadataDownloader = null;
+    	} else {
+    		outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", false);
+    	}
+    }
+    
+    @Override
     protected void onDestroy() {
     	super.onDestroy();
     	
 		if (metadataDownloader != null) {
 			metadataDownloader.setListener(null);
     		metadataDownloader.cancel(true);
+    		
+    		metadataDownloader = null;
 		}
     }
     
@@ -106,7 +145,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         				if (metadataDownloader == null) {
             				showMetadataProgressDialog();
 
-            				metadataDownloader = new MetadataDownloader(this); 
+            				metadataDownloader = new MetadataDownloader(builder.build().toString(), this);
             				metadataDownloader.execute(builder.build().toString());
         				}
         			}
@@ -354,7 +393,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         }
         
         @Override
-        public void onSaveInstanceState (Bundle outState) {
+        public void onSaveInstanceState(Bundle outState) {
         	super.onSaveInstanceState(outState);
         	
         	((WebView)getView().findViewById(R.id.webview)).saveState(outState);

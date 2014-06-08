@@ -13,14 +13,20 @@ public class MetadataDownloader extends AsyncTask<String, Void, String> {
 		public abstract void onMetadataDownloadComplete(String metadata);
 	}
 	
-	public MetadataDownloaderListener callbackListener;
+	private String                     metadataUrl;
+	private MetadataDownloaderListener callbackListener;
 	
-	public MetadataDownloader(MetadataDownloaderListener listener) {
+	public MetadataDownloader(String url, MetadataDownloaderListener listener) {
+		metadataUrl      = url;
 		callbackListener = listener;
 	}
 	
 	public void setListener(MetadataDownloaderListener listener) {
 		callbackListener = listener;
+	}
+	
+	public String getUrl() {
+		return metadataUrl;
 	}
 	
 	@Override
