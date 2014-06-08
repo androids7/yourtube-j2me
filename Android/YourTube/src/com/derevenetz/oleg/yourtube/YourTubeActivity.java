@@ -44,6 +44,16 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
 
     @Override
+    protected void onDestroy() {
+    	super.onDestroy();
+    	
+		if (metadataDownloader != null) {
+			metadataDownloader.setListener(null);
+    		metadataDownloader.cancel(true);
+		}
+    }
+    
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.your_tube, menu);
 
@@ -94,7 +104,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         				                                                                                .appendQueryParameter("hl", "en");
         				
         				if (metadataDownloader == null) {
-            				ShowMetadataProgressDialog();
+            				showMetadataProgressDialog();
 
             				metadataDownloader = new MetadataDownloader(this); 
             				metadataDownloader.execute(builder.build().toString());
@@ -192,12 +202,12 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 			try {
 				manager.enqueue(request);
 
-				ShowToast(getString(R.string.toast_message_download_started));
+				showToast(getString(R.string.toast_message_download_started));
 			} catch (Exception ex) {
-				ShowToast(getString(R.string.toast_message_download_failed));
+				showToast(getString(R.string.toast_message_download_failed));
 			}
 		} else {
-			ShowToast(getString(R.string.toast_message_download_failed));
+			showToast(getString(R.string.toast_message_download_failed));
 		}
     }
     
@@ -205,7 +215,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     public void onMetadataDownloadComplete(String metadata) {
     	metadataDownloader = null;
     	
-    	DismissDialog();
+    	dismissDialog();
 
     	if (metadata != null) {
     		Uri metadata_uri = Uri.parse("http://localhost/?" + metadata);
@@ -274,23 +284,23 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     			}
     			
     			if (itags.size() != 0) {
-    				ShowFormatSelectionDialog(video_title, itags, formats, extensions, urls);
+    				showFormatSelectionDialog(video_title, itags, formats, extensions, urls);
     			} else {
-    				ShowToast(getString(R.string.toast_message_no_valid_formats));
+    				showToast(getString(R.string.toast_message_no_valid_formats));
     			}
     		} else {
-				ShowToast(getString(R.string.toast_message_no_valid_formats));
+				showToast(getString(R.string.toast_message_no_valid_formats));
     		}
     	} else {
-    		ShowToast(getString(R.string.toast_message_operation_cancelled));
+    		showToast(getString(R.string.toast_message_operation_cancelled));
     	}
     }
     
-    private void ShowToast(String message) {
+    private void showToast(String message) {
     	Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
     
-    private void ShowMetadataProgressDialog() {
+    private void showMetadataProgressDialog() {
     	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
     	
     	if (prev_fragment != null) {
@@ -302,7 +312,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	fragment.show(getFragmentManager(), "dialog");
     }
 
-    private void ShowFormatSelectionDialog(String video_title, ArrayList<String> itags, ArrayList<String> formats, ArrayList<String> extensions, ArrayList<String> urls) {
+    private void showFormatSelectionDialog(String video_title, ArrayList<String> itags, ArrayList<String> formats, ArrayList<String> extensions, ArrayList<String> urls) {
     	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
     	
     	if (prev_fragment != null) {
@@ -314,7 +324,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	fragment.show(getFragmentManager(), "dialog");
     }
     
-    private void DismissDialog() {
+    private void dismissDialog() {
     	DialogFragment fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
     	
     	if (fragment != null) {

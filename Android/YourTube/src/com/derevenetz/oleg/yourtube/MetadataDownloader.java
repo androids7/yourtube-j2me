@@ -19,6 +19,10 @@ public class MetadataDownloader extends AsyncTask<String, Void, String> {
 		callbackListener = listener;
 	}
 	
+	public void setListener(MetadataDownloaderListener listener) {
+		callbackListener = listener;
+	}
+	
 	@Override
 	protected String doInBackground(String... params) {
 		try {
@@ -58,17 +62,21 @@ public class MetadataDownloader extends AsyncTask<String, Void, String> {
 	protected void onCancelled() {
 		super.onCancelled();
 
-		callbackListener.onMetadataDownloadComplete(null);
+		if (callbackListener != null) {
+			callbackListener.onMetadataDownloadComplete(null);
+		}
 	}
 	
 	@Override
 	protected void onPostExecute(String result) {
 		super.onPostExecute(result);
 		
-		if (isCancelled()) {
-			callbackListener.onMetadataDownloadComplete(null);
-		} else {
-			callbackListener.onMetadataDownloadComplete(result);
+		if (callbackListener != null) {
+			if (isCancelled()) {
+				callbackListener.onMetadataDownloadComplete(null);
+			} else {
+				callbackListener.onMetadataDownloadComplete(result);
+			}
 		}
 	}
 }

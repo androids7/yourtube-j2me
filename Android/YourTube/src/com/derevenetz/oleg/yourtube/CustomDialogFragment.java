@@ -110,7 +110,9 @@ public class CustomDialogFragment extends DialogFragment {
 					int position = ((AlertDialog)dialog).getListView().getCheckedItemPosition();
 					
 					if (position >= 0 && position < itags.size()) {
-						activity.onFormatSelected(getArguments().getString("video_title"), itags.get(position), extensions.get(position), urls.get(position));
+						if (activity != null) {
+							activity.onFormatSelected(getArguments().getString("video_title"), itags.get(position), extensions.get(position), urls.get(position));
+						}
 					}
 				}
 			});
@@ -128,7 +130,9 @@ public class CustomDialogFragment extends DialogFragment {
 		CustomDialogFragmentListener activity = (CustomDialogFragmentListener)getActivity();
 		
 		if (getArguments().getInt("type") == TYPE_PROGRESS_METADATA) {
-			activity.onMetadataProgressCancelled();
+			if (activity != null) {
+				activity.onMetadataProgressCancelled();
+			}
 		}
 	}
 
@@ -139,7 +143,9 @@ public class CustomDialogFragment extends DialogFragment {
 		CustomDialogFragmentListener activity = (CustomDialogFragmentListener)getActivity();
 		
 		if (getArguments().getInt("type") == TYPE_PROGRESS_METADATA) {
-			activity.onMetadataProgressCancelled();
+			if (activity != null) {
+				activity.onMetadataProgressCancelled();
+			}
 		}
 	}
 }
