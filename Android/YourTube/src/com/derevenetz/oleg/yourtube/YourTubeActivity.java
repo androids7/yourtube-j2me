@@ -20,6 +20,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
@@ -36,6 +38,8 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getWindow().requestFeature(Window.FEATURE_PROGRESS);
+        
         setContentView(R.layout.activity_yourtube);
 
         if (savedInstanceState == null) {
@@ -382,7 +386,19 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 
             web_view.getSettings().setJavaScriptEnabled(true);
         	web_view.setWebViewClient(new WebViewClient());
-            
+
+            if (getActivity() != null && getActivity().getWindow().hasFeature(Window.FEATURE_PROGRESS)) {
+            	web_view.setWebChromeClient(new WebChromeClient() {
+            		public void onProgressChanged(WebView view, int progress) {
+            			if (getActivity() != null) {
+            				getActivity().setProgress(progress * 100);
+            			}
+            		}
+            	});
+            } else {
+            	web_view.setWebChromeClient(new WebChromeClient());
+            }
+        	
             if (savedInstanceState != null) {
             	web_view.restoreState(savedInstanceState);
             } else {
