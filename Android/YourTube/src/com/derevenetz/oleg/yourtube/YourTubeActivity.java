@@ -5,15 +5,24 @@ import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import org.json.JSONObject;
+
 import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
 import android.app.Fragment;
+import android.app.PendingIntent;
+import android.content.ComponentName;
+import android.content.Context;
+import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.IBinder;
+import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -26,13 +35,88 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
+import com.nokia.payment.iap.aidl.INokiaIAPService;
+
 import com.derevenetz.oleg.yourtube.CustomDialogFragment;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment.CustomDialogFragmentListener;
 import com.derevenetz.oleg.yourtube.MetadataDownloader;
 import com.derevenetz.oleg.yourtube.MetadataDownloader.MetadataDownloaderListener;
 
 public class YourTubeActivity extends Activity implements MetadataDownloaderListener, CustomDialogFragmentListener {
-	private MetadataDownloader metadataDownloader = null;
+	private final int          MAX_FREE_DOWNLOAD_ATTEMPTS  = 3,
+			                   IAP_RESULT_OK               = 0,
+			                   REQUEST_CODE_BUY_INTENT     = 1000;
+	
+	private final String       IAP_FULL_VERSION_PRODUCT_ID = "1023625",
+			                   IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
+	
+	private boolean            iapSupported                = false,
+			                   isFullVersion               = false;
+	private MetadataDownloader metadataDownloader          = null;
+	private INokiaIAPService   iapService                  = null;
+	
+	private ServiceConnection iapServiceConnection = new ServiceConnection() {
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			iapService = null;
+		}
+		
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder service) {
+			iapService = INokiaIAPService.Stub.asInterface(service);
+			
+			try {
+				int response = iapService.isBillingSupported(3, getPackageName(), "inapp");
+				
+				if (response == IAP_RESULT_OK) {
+					iapSupported = true;
+					
+					(new Thread(new Runnable() {
+						@Override
+						public void run() {
+							ArrayList<String> product_list   = new ArrayList<String>();
+							Bundle            query_products = new Bundle();
+							
+							product_list.add(IAP_FULL_VERSION_PRODUCT_ID);
+							
+							query_products.putStringArrayList("ITEM_ID_LIST", product_list);
+							
+							String continuationToken = null;
+							
+							do {
+								try {
+									Bundle owned_items = iapService.getPurchases(3, getPackageName(), "inapp", query_products, continuationToken);
+									
+									if (owned_items.getInt("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
+										ArrayList<String> owned_products = owned_items.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
+										
+										for (int i = 0; i < owned_products.size(); i++) {
+											String product = owned_products.get(i);
+											
+											if (product.equals(IAP_FULL_VERSION_PRODUCT_ID)) {
+												isFullVersion = true;
+
+										    	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+										    	
+										    	editor.putBoolean("FullVersion", isFullVersion);
+										    	editor.commit();
+											}
+										}
+									}
+								} catch (Exception ex) {
+									continuationToken = null;
+								}
+							} while (!TextUtils.isEmpty(continuationToken));
+						}
+					})).start();
+				} else {
+					iapSupported = false;
+				}
+			} catch (Exception ex) {
+				iapSupported = false;
+			}
+		}
+	};
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +129,10 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         if (savedInstanceState == null) {
             getFragmentManager().beginTransaction().add(R.id.activity_yourtube, new MainFragment()).commit();
         }
+
+        isFullVersion = getPreferences(MODE_PRIVATE).getBoolean("FullVersion", false);
+        
+        bindService(new Intent("com.nokia.payment.iapenabler.InAppBillingService.BIND"), iapServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
@@ -94,6 +182,10 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     		
     		metadataDownloader = null;
 		}
+		
+		if (iapServiceConnection != null) {
+			unbindService(iapServiceConnection);
+		}
     }
     
     @Override
@@ -108,52 +200,67 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         int id = item.getItemId();
 
         if (id == R.id.action_download) {
-        	WebView web_view = (WebView)findViewById(R.id.webview);
-
-        	if (web_view != null) {
-        		String url = web_view.getUrl();
-        		
-        		if (url.contains("/watch?")) {
-        			String video_id = "";
-        			
-        			Pattern pat_1 = Pattern.compile("&v=([^&]+)");
-        			Matcher mat_1 = pat_1.matcher(url);
-        			
-        			while (mat_1.find()) {
-        				video_id = mat_1.group(1);
-        				
-        				break;
+        	int download_attempt = getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0);
+        	
+        	if (isFullVersion || download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS) {
+        		if (!isFullVersion) {
+        			if (download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS - 1) {
+            			showToast(String.format(getString(R.string.toast_message_trial_attempts_remaining),
+          					      Integer.toString(MAX_FREE_DOWNLOAD_ATTEMPTS - download_attempt - 1)));
+        			} else {
+            			showToast(getString(R.string.toast_message_trial_last_attempt));
         			}
+        		}
+        		
+            	WebView web_view = (WebView)findViewById(R.id.webview);
 
-        			if (video_id.isEmpty()) {
-            			Pattern pat_2 = Pattern.compile("\\?v=([^&]+)");
-            			Matcher mat_2 = pat_2.matcher(url);
+            	if (web_view != null) {
+            		String url = web_view.getUrl();
+            		
+            		if (url.contains("/watch?")) {
+            			String video_id = "";
             			
-            			while (mat_2.find()) {
-            				video_id = mat_2.group(1);
+            			Pattern pat_1 = Pattern.compile("&v=([^&]+)");
+            			Matcher mat_1 = pat_1.matcher(url);
+            			
+            			while (mat_1.find()) {
+            				video_id = mat_1.group(1);
             				
             				break;
             			}
-        			}
-        			
-        			if (!video_id.isEmpty()) {
-        				Uri.Builder builder = new Uri.Builder();
 
-        				builder.scheme("http").authority("www.youtube.com").appendPath("get_video_info").appendQueryParameter("video_id", video_id)
-        				                                                                                .appendQueryParameter("el", "detailpage")
-        				                                                                                .appendQueryParameter("ps", "default")
-        				                                                                                .appendQueryParameter("eurl", "")
-        				                                                                                .appendQueryParameter("gl", "US")
-        				                                                                                .appendQueryParameter("hl", "en");
-        				
-        				if (metadataDownloader == null) {
-            				showMetadataProgressDialog();
+            			if (video_id.isEmpty()) {
+                			Pattern pat_2 = Pattern.compile("\\?v=([^&]+)");
+                			Matcher mat_2 = pat_2.matcher(url);
+                			
+                			while (mat_2.find()) {
+                				video_id = mat_2.group(1);
+                				
+                				break;
+                			}
+            			}
+            			
+            			if (!video_id.isEmpty()) {
+            				Uri.Builder builder = new Uri.Builder();
 
-            				metadataDownloader = new MetadataDownloader(builder.build().toString(), this);
-            				metadataDownloader.execute(builder.build().toString());
-        				}
-        			}
-        		}
+            				builder.scheme("http").authority("www.youtube.com").appendPath("get_video_info").appendQueryParameter("video_id", video_id)
+            				                                                                                .appendQueryParameter("el", "detailpage")
+            				                                                                                .appendQueryParameter("ps", "default")
+            				                                                                                .appendQueryParameter("eurl", "")
+            				                                                                                .appendQueryParameter("gl", "US")
+            				                                                                                .appendQueryParameter("hl", "en");
+            				
+            				if (metadataDownloader == null) {
+                				showMetadataProgressDialog();
+
+                				metadataDownloader = new MetadataDownloader(builder.build().toString(), this);
+                				metadataDownloader.execute(builder.build().toString());
+            				}
+            			}
+            		}
+            	}
+        	} else {
+        		showBuyFullVersionQuestionDialog();
         	}
         	
             return true;
@@ -187,6 +294,33 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    	super.onActivityResult(requestCode, resultCode, data);
+    	
+    	if (requestCode == REQUEST_CODE_BUY_INTENT) {
+    		if (data.getIntExtra("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
+        		try {
+    				JSONObject object = new JSONObject(data.getStringExtra("INAPP_PURCHASE_DATA"));
+    				
+    				if (object.getString("productId").equals(IAP_FULL_VERSION_PRODUCT_ID) &&
+    					object.getString("developerPayload").equals(IAP_DEVELOPER_PAYLOAD)) {
+    					isFullVersion = true;
+
+				    	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+				    	
+				    	editor.putBoolean("FullVersion", isFullVersion);
+				    	editor.commit();
+    				}
+    			} catch (Exception ex) {
+    				showToast(getString(R.string.toast_message_purchase_failed));
+    			}
+    		} else {
+    			showToast(getString(R.string.toast_message_purchase_failed));
+    		}
+    	}
+    }
+    
+    @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
     	WebView web_view = (WebView)findViewById(R.id.webview);
     	
@@ -201,6 +335,22 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
 
     @Override
+    public void onBuyFullVersionAgree() {
+		if (iapSupported) {
+			try {
+				Bundle        intent_bundle  = iapService.getBuyIntent(3, getPackageName(), IAP_FULL_VERSION_PRODUCT_ID, "inapp", IAP_DEVELOPER_PAYLOAD);
+				PendingIntent pending_intent = intent_bundle.getParcelable("BUY_INTENT");
+				
+				startIntentSenderForResult(pending_intent.getIntentSender(), REQUEST_CODE_BUY_INTENT, new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
+			} catch (Exception ex) {
+				showToast(getString(R.string.toast_message_purchase_failed)); 
+			}
+		} else {
+			showToast(getString(R.string.toast_message_iap_not_supported));
+		}
+    }
+    
+    @Override
     public void onMetadataProgressCancelled() {
 		if (metadataDownloader != null) {
     		metadataDownloader.cancel(true);
@@ -210,6 +360,10 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     @Override
     public void onFormatSelected(String video_title, String itag, String extension, String url) {
     	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+    	
+    	if (!isFullVersion) {
+        	editor.putInt("DownloadAttempt", getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0) + 1);
+    	}
     	
     	editor.putString("PreferredITag", itag);
     	editor.commit();
@@ -343,6 +497,18 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     	Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
     
+    private void showBuyFullVersionQuestionDialog() {
+    	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
+    	
+    	if (prev_fragment != null) {
+    		prev_fragment.dismiss();
+    	}
+    	
+    	DialogFragment fragment = CustomDialogFragment.newBuyFullVersionQuestionInstance();
+    	
+    	fragment.show(getFragmentManager(), "dialog");
+    }
+
     private void showMetadataProgressDialog() {
     	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
     	

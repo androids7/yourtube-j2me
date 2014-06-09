@@ -51,14 +51,22 @@ public final class R {
         public static final int action_home=0x7f050003;
         public static final int action_refresh=0x7f050002;
         public static final int app_name=0x7f050000;
-        public static final int button_ok=0x7f05000b;
+        public static final int button_no=0x7f050013;
+        public static final int button_ok=0x7f050011;
+        public static final int button_yes=0x7f050012;
+        public static final int dialog_message_buy_full_version=0x7f050008;
+        public static final int dialog_title_buy_full_version=0x7f050007;
         public static final int dialog_title_choose_format=0x7f050006;
         public static final int dialog_title_loading_metadata=0x7f050005;
-        public static final int toast_message_download_failed=0x7f05000a;
-        public static final int toast_message_download_started=0x7f050009;
-        public static final int toast_message_no_valid_formats=0x7f050007;
-        public static final int toast_message_operation_cancelled=0x7f050008;
-        public static final int uri_help=0x7f05000c;
+        public static final int toast_message_download_failed=0x7f05000c;
+        public static final int toast_message_download_started=0x7f05000b;
+        public static final int toast_message_iap_not_supported=0x7f05000e;
+        public static final int toast_message_no_valid_formats=0x7f050009;
+        public static final int toast_message_operation_cancelled=0x7f05000a;
+        public static final int toast_message_purchase_failed=0x7f05000d;
+        public static final int toast_message_trial_attempts_remaining=0x7f05000f;
+        public static final int toast_message_trial_last_attempt=0x7f050010;
+        public static final int uri_help=0x7f050014;
     }
     public static final class style {
         /** 

@@ -10,11 +10,13 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 
 public class CustomDialogFragment extends DialogFragment {
-	private static final int TYPE_MESSAGE           = 0;
-	private static final int TYPE_PROGRESS_METADATA = 1;
-	private static final int TYPE_FORMAT_SELECTION  = 2;
+	private static final int TYPE_MESSAGE                   = 0;
+	private static final int TYPE_BUY_FULL_VERSION_QUESTION = 1;
+	private static final int TYPE_PROGRESS_METADATA         = 2;
+	private static final int TYPE_FORMAT_SELECTION          = 3;
 
 	public static interface CustomDialogFragmentListener {
+		public abstract void onBuyFullVersionAgree();
 		public abstract void onMetadataProgressCancelled();
 		public abstract void onFormatSelected(String video_title, String itag, String extension, String url);
 	}
@@ -27,6 +29,18 @@ public class CustomDialogFragment extends DialogFragment {
 		args.putInt   ("type",    TYPE_MESSAGE);
 		args.putString("title",   title);
 		args.putString("message", message);
+		
+		fragment.setArguments(args);
+		
+		return fragment;
+	}
+	
+	public static CustomDialogFragment newBuyFullVersionQuestionInstance() {
+		CustomDialogFragment fragment = new CustomDialogFragment();
+		
+		Bundle args = new Bundle();
+		
+		args.putInt("type", TYPE_BUY_FULL_VERSION_QUESTION);
 		
 		fragment.setArguments(args);
 		
@@ -71,6 +85,24 @@ public class CustomDialogFragment extends DialogFragment {
 			return new AlertDialog.Builder(getActivity()).setTitle(getArguments().getString("title"))
 					                                     .setIcon(R.drawable.ic_alert)
 					                                     .setMessage(getArguments().getString("message")).create();
+		} else if (getArguments().getInt("type") == TYPE_BUY_FULL_VERSION_QUESTION) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+			
+			builder.setTitle(getString(R.string.dialog_title_buy_full_version));
+			builder.setMessage(getString(R.string.dialog_message_buy_full_version));
+			builder.setPositiveButton(R.string.button_yes, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					CustomDialogFragmentListener activity = (CustomDialogFragmentListener)getActivity();
+					
+					if (activity != null) {
+						activity.onBuyFullVersionAgree();
+					}
+				}
+			});
+			builder.setNegativeButton(R.string.button_no, null);
+			
+			return builder.create();
 		} else if (getArguments().getInt("type") == TYPE_PROGRESS_METADATA) {
     		final ProgressDialog dialog = new ProgressDialog(getActivity());
     		

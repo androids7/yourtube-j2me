@@ -3,9 +3,22 @@
     <string name="app_name">YouTube Downloader</string>
     <string name="action_download">Download</string>
     <string name="action_refresh">Refresh</string>
-    <string name="action_home">Home</string><string name="action_help">Help</string><string name="dialog_title_loading_metadata">Loading video metadata</string>
-    <string name="dialog_title_choose_format">Choose desired video format</string><string name="toast_message_no_valid_formats">No valid video formats found</string>
+    <string name="action_home">Home</string>
+    <string name="action_help">Help</string>
+    <string name="dialog_title_loading_metadata">Loading video metadata</string>
+    <string name="dialog_title_choose_format">Choose desired video format</string>
+    <string name="dialog_title_buy_full_version">Trial period expired</string>
+    <string name="dialog_message_buy_full_version">Trial period for this app was expired. Do you want to buy a full unlimited version of this app?</string>
+    <string name="toast_message_no_valid_formats">No valid video formats found</string>
     <string name="toast_message_operation_cancelled">Operation was cancelled by user</string>
-    <string name="toast_message_download_started">Video download started</string><string name="toast_message_download_failed">Video download failed, download service is not available</string><string name="button_ok">OK</string>
+    <string name="toast_message_download_started">Video download started</string>
+    <string name="toast_message_download_failed">Video download failed, download service is not available</string>
+    <string name="toast_message_purchase_failed">Purchase attempt failed</string>
+    <string name="toast_message_iap_not_supported">In-App purchases are not supported on this device</string>
+    <string name="toast_message_trial_attempts_remaining">Application is in trial mode. You will be able to download another %s video(s) after this one</string>
+    <string name="toast_message_trial_last_attempt">Application is in trial mode. This is the last video that you can download in this mode</string>
+    <string name="button_ok">OK</string>
+    <string name="button_yes">Yes</string>
+    <string name="button_no">No</string>
     <string name="uri_help">file:///android_asset/doc/help.html</string>
 </resources>
