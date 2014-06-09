@@ -57,11 +57,6 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 	
 	private ServiceConnection iapServiceConnection = new ServiceConnection() {
 		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			iapService = null;
-		}
-		
-		@Override
 		public void onServiceConnected(ComponentName name, IBinder service) {
 			iapService = INokiaIAPService.Stub.asInterface(service);
 			
@@ -115,6 +110,11 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 			} catch (Exception ex) {
 				iapSupported = false;
 			}
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			iapService = null;
 		}
 	};
 	
