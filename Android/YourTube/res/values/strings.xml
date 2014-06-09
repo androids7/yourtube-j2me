@@ -12,7 +12,8 @@
     <string name="toast_message_no_valid_formats">No valid video formats found</string>
     <string name="toast_message_operation_cancelled">Operation was cancelled by user</string>
     <string name="toast_message_download_started">Video download started</string>
-    <string name="toast_message_download_failed">Video download failed, download service is not available</string>
+    <string name="toast_message_media_unavailable">SD card is read-only or not available</string>
+    <string name="toast_message_download_failed">Video download failed, request to download service returned error</string>
     <string name="toast_message_purchase_failed">Purchase attempt failed</string>
     <string name="toast_message_iap_not_supported">In-App purchases are not supported on this device</string>
     <string name="toast_message_trial_attempts_remaining">Application is in trial mode. You will be able to download another %s video(s) after this one</string>
