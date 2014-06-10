@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">YouTube Downloader</string>
+    <string name="action_download">Загрузить</string>
+    <string name="action_refresh">Обновить</string>
+    <string name="action_home">Домой</string>
+    <string name="action_help">Справка</string>
+    <string name="dialog_title_loading_metadata">Загружаются данные видео</string>
+    <string name="dialog_title_choose_format">Выберите формат видео</string>
+    <string name="dialog_title_buy_full_version">Пробный период истек</string>
+    <string name="dialog_message_buy_full_version">Пробный период для этого приложения истек. Хотите купить полную версию?</string>
+    <string name="toast_message_no_valid_formats">Нет доступных видеоформатов</string>
+    <string name="toast_message_operation_cancelled">Операция отменена пользователем</string>
+    <string name="toast_message_download_started">Загрузка видео начата</string>
+    <string name="toast_message_media_unavailable">SD-карта не установлена или недоступна для записи</string>
+    <string name="toast_message_download_failed">Ошибка загрузки видео, запрос к сервису загрузки вернул ошибку</string>
+    <string name="toast_message_purchase_failed">Ошибка при покупке</string>
+    <string name="toast_message_iap_not_supported">Покупка внутри приложений не поддерживается на данном устройстве</string>
+    <string name="toast_message_trial_attempts_remaining">Приложение работает в пробном режиме. Вы сможете скачать еще %s видео после этого</string>
+    <string name="toast_message_trial_last_attempt">Приложение работает в пробном режиме. Это видео - последнее, которое вы сможете скачать в данном режиме</string>
+    <string name="button_ok">OK</string>
+    <string name="button_yes">Да</string>
+    <string name="button_no">Нет</string>
+    <string name="uri_help">file:///android_asset/doc/help_ru.html</string>
+</resources>
