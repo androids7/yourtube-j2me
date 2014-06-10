@@ -47,7 +47,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 			                   IAP_RESULT_OK               = 0,
 			                   REQUEST_CODE_BUY_INTENT     = 1000;
 	
-	private final String       IAP_FULL_VERSION_PRODUCT_ID = "1023608",
+	private final String       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
 			                   IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
 	
 	private boolean            iapSupported                = false,
