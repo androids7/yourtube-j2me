@@ -43,81 +43,81 @@ import com.derevenetz.oleg.yourtube.MetadataDownloader;
 import com.derevenetz.oleg.yourtube.MetadataDownloader.MetadataDownloaderListener;
 
 public class YourTubeActivity extends Activity implements MetadataDownloaderListener, CustomDialogFragmentListener {
-	private final int          MAX_FREE_DOWNLOAD_ATTEMPTS  = 3,
-			                   IAP_RESULT_OK               = 0,
-			                   REQUEST_CODE_BUY_INTENT     = 1000;
-	
-	private final String       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
-			                   IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
-	
-	private boolean            iapSupported                = false,
-			                   isFullVersion               = false;
-	private MetadataDownloader metadataDownloader          = null;
-	private INokiaIAPService   iapService                  = null;
-	
-	private ServiceConnection iapServiceConnection = new ServiceConnection() {
-		@Override
-		public void onServiceConnected(ComponentName name, IBinder service) {
-			iapService = INokiaIAPService.Stub.asInterface(service);
-			
-			try {
-				int response = iapService.isBillingSupported(3, getPackageName(), "inapp");
-				
-				if (response == IAP_RESULT_OK) {
-					iapSupported = true;
-					
-					(new Thread(new Runnable() {
-						@Override
-						public void run() {
-							ArrayList<String> product_list   = new ArrayList<String>();
-							Bundle            query_products = new Bundle();
-							
-							product_list.add(IAP_FULL_VERSION_PRODUCT_ID);
-							
-							query_products.putStringArrayList("ITEM_ID_LIST", product_list);
-							
-							String continuationToken = null;
-							
-							do {
-								try {
-									Bundle owned_items = iapService.getPurchases(3, getPackageName(), "inapp", query_products, continuationToken);
-									
-									if (owned_items.getInt("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
-										ArrayList<String> owned_products = owned_items.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
-										
-										for (int i = 0; i < owned_products.size(); i++) {
-											String product = owned_products.get(i);
-											
-											if (product.equals(IAP_FULL_VERSION_PRODUCT_ID)) {
-												isFullVersion = true;
+    private final int          MAX_FREE_DOWNLOAD_ATTEMPTS  = 3,
+                               IAP_RESULT_OK               = 0,
+                               REQUEST_CODE_BUY_INTENT     = 1000;
+    
+    private final String       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
+                               IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
+    
+    private boolean            iapSupported                = false,
+                               isFullVersion               = false;
+    private MetadataDownloader metadataDownloader          = null;
+    private INokiaIAPService   iapService                  = null;
+    
+    private ServiceConnection iapServiceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            iapService = INokiaIAPService.Stub.asInterface(service);
+            
+            try {
+                int response = iapService.isBillingSupported(3, getPackageName(), "inapp");
+                
+                if (response == IAP_RESULT_OK) {
+                    iapSupported = true;
+                    
+                    (new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            ArrayList<String> product_list   = new ArrayList<String>();
+                            Bundle            query_products = new Bundle();
+                            
+                            product_list.add(IAP_FULL_VERSION_PRODUCT_ID);
+                            
+                            query_products.putStringArrayList("ITEM_ID_LIST", product_list);
+                            
+                            String continuationToken = null;
+                            
+                            do {
+                                try {
+                                    Bundle owned_items = iapService.getPurchases(3, getPackageName(), "inapp", query_products, continuationToken);
+                                    
+                                    if (owned_items.getInt("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
+                                        ArrayList<String> owned_products = owned_items.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
+                                        
+                                        for (int i = 0; i < owned_products.size(); i++) {
+                                            String product = owned_products.get(i);
+                                            
+                                            if (product.equals(IAP_FULL_VERSION_PRODUCT_ID)) {
+                                                isFullVersion = true;
 
-										    	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-										    	
-										    	editor.putBoolean("FullVersion", isFullVersion);
-										    	editor.commit();
-											}
-										}
-									}
-								} catch (Exception ex) {
-									continuationToken = null;
-								}
-							} while (!TextUtils.isEmpty(continuationToken));
-						}
-					})).start();
-				} else {
-					iapSupported = false;
-				}
-			} catch (Exception ex) {
-				iapSupported = false;
-			}
-		}
+                                                SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+                                                
+                                                editor.putBoolean("FullVersion", isFullVersion);
+                                                editor.commit();
+                                            }
+                                        }
+                                    }
+                                } catch (Exception ex) {
+                                    continuationToken = null;
+                                }
+                            } while (!TextUtils.isEmpty(continuationToken));
+                        }
+                    })).start();
+                } else {
+                    iapSupported = false;
+                }
+            } catch (Exception ex) {
+                iapSupported = false;
+            }
+        }
 
-		@Override
-		public void onServiceDisconnected(ComponentName name) {
-			iapService = null;
-		}
-	};
-	
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            iapService = null;
+        }
+    };
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,55 +137,55 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
-    	super.onRestoreInstanceState(savedInstanceState);
-    	
-    	if (savedInstanceState.getBoolean("YourTubeActivity.metadataDownloaderRunning", false)) {
-			if (metadataDownloader == null) {
-				String url = savedInstanceState.getString ("YourTubeActivity.metadataDownloaderURL", "");
-				
-				showMetadataProgressDialog();
+        super.onRestoreInstanceState(savedInstanceState);
+        
+        if (savedInstanceState.getBoolean("YourTubeActivity.metadataDownloaderRunning", false)) {
+            if (metadataDownloader == null) {
+                String url = savedInstanceState.getString ("YourTubeActivity.metadataDownloaderURL", "");
+                
+                showMetadataProgressDialog();
 
-				metadataDownloader = new MetadataDownloader(url, this);
-				metadataDownloader.execute(url);
-			}
-    	}
+                metadataDownloader = new MetadataDownloader(url, this);
+                metadataDownloader.execute(url);
+            }
+        }
     }
     
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-    	if (metadataDownloader != null) {
-    		dismissDialog();
-    	}
-    	
-    	super.onSaveInstanceState(outState);
-    	
-    	if (metadataDownloader != null) {
-    		outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", true);
-    		outState.putString ("YourTubeActivity.metadataDownloaderURL",     metadataDownloader.getUrl());
+        if (metadataDownloader != null) {
+            dismissDialog();
+        }
+        
+        super.onSaveInstanceState(outState);
+        
+        if (metadataDownloader != null) {
+            outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", true);
+            outState.putString ("YourTubeActivity.metadataDownloaderURL",     metadataDownloader.getUrl());
 
-			metadataDownloader.setListener(null);
-    		metadataDownloader.cancel(true);
-    		
-    		metadataDownloader = null;
-    	} else {
-    		outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", false);
-    	}
+            metadataDownloader.setListener(null);
+            metadataDownloader.cancel(true);
+            
+            metadataDownloader = null;
+        } else {
+            outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", false);
+        }
     }
     
     @Override
     protected void onDestroy() {
-    	super.onDestroy();
-    	
-		if (metadataDownloader != null) {
-			metadataDownloader.setListener(null);
-    		metadataDownloader.cancel(true);
-    		
-    		metadataDownloader = null;
-		}
-		
-		if (iapServiceConnection != null) {
-			unbindService(iapServiceConnection);
-		}
+        super.onDestroy();
+        
+        if (metadataDownloader != null) {
+            metadataDownloader.setListener(null);
+            metadataDownloader.cancel(true);
+            
+            metadataDownloader = null;
+        }
+        
+        if (iapServiceConnection != null) {
+            unbindService(iapServiceConnection);
+        }
     }
     
     @Override
@@ -200,93 +200,93 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         int id = item.getItemId();
 
         if (id == R.id.action_download) {
-        	int download_attempt = getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0);
-        	
-        	if (isFullVersion || download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS) {
-        		if (!isFullVersion) {
-        			if (download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS - 1) {
-            			showToast(String.format(getString(R.string.toast_message_trial_attempts_remaining),
-          					      Integer.toString(MAX_FREE_DOWNLOAD_ATTEMPTS - download_attempt - 1)));
-        			} else {
-            			showToast(getString(R.string.toast_message_trial_last_attempt));
-        			}
-        		}
-        		
-            	WebView web_view = (WebView)findViewById(R.id.webview);
+            int download_attempt = getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0);
+            
+            if (isFullVersion || download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS) {
+                if (!isFullVersion) {
+                    if (download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS - 1) {
+                        showToast(String.format(getString(R.string.toast_message_trial_attempts_remaining),
+                                  Integer.toString(MAX_FREE_DOWNLOAD_ATTEMPTS - download_attempt - 1)));
+                    } else {
+                        showToast(getString(R.string.toast_message_trial_last_attempt));
+                    }
+                }
+                
+                WebView web_view = (WebView)findViewById(R.id.webview);
 
-            	if (web_view != null) {
-            		String url = web_view.getUrl();
-            		
-            		if (url.contains("/watch?")) {
-            			String video_id = "";
-            			
-            			Pattern pat_1 = Pattern.compile("&v=([^&]+)");
-            			Matcher mat_1 = pat_1.matcher(url);
-            			
-            			while (mat_1.find()) {
-            				video_id = mat_1.group(1);
-            				
-            				break;
-            			}
+                if (web_view != null) {
+                    String url = web_view.getUrl();
+                    
+                    if (url.contains("/watch?")) {
+                        String video_id = "";
+                        
+                        Pattern pat_1 = Pattern.compile("&v=([^&]+)");
+                        Matcher mat_1 = pat_1.matcher(url);
+                        
+                        while (mat_1.find()) {
+                            video_id = mat_1.group(1);
+                            
+                            break;
+                        }
 
-            			if (video_id.isEmpty()) {
-                			Pattern pat_2 = Pattern.compile("\\?v=([^&]+)");
-                			Matcher mat_2 = pat_2.matcher(url);
-                			
-                			while (mat_2.find()) {
-                				video_id = mat_2.group(1);
-                				
-                				break;
-                			}
-            			}
-            			
-            			if (!video_id.isEmpty()) {
-            				Uri.Builder builder = new Uri.Builder();
+                        if (video_id.isEmpty()) {
+                            Pattern pat_2 = Pattern.compile("\\?v=([^&]+)");
+                            Matcher mat_2 = pat_2.matcher(url);
+                            
+                            while (mat_2.find()) {
+                                video_id = mat_2.group(1);
+                                
+                                break;
+                            }
+                        }
+                        
+                        if (!video_id.isEmpty()) {
+                            Uri.Builder builder = new Uri.Builder();
 
-            				builder.scheme("http").authority("www.youtube.com").appendPath("get_video_info").appendQueryParameter("video_id", video_id)
-            				                                                                                .appendQueryParameter("el", "detailpage")
-            				                                                                                .appendQueryParameter("ps", "default")
-            				                                                                                .appendQueryParameter("eurl", "")
-            				                                                                                .appendQueryParameter("gl", "US")
-            				                                                                                .appendQueryParameter("hl", "en");
-            				
-            				if (metadataDownloader == null) {
-                				showMetadataProgressDialog();
+                            builder.scheme("http").authority("www.youtube.com").appendPath("get_video_info").appendQueryParameter("video_id", video_id)
+                                                                                                            .appendQueryParameter("el", "detailpage")
+                                                                                                            .appendQueryParameter("ps", "default")
+                                                                                                            .appendQueryParameter("eurl", "")
+                                                                                                            .appendQueryParameter("gl", "US")
+                                                                                                            .appendQueryParameter("hl", "en");
+                            
+                            if (metadataDownloader == null) {
+                                showMetadataProgressDialog();
 
-                				metadataDownloader = new MetadataDownloader(builder.build().toString(), this);
-                				metadataDownloader.execute(builder.build().toString());
-            				}
-            			}
-            		}
-            	}
-        	} else {
-        		showBuyFullVersionQuestionDialog();
-        	}
-        	
+                                metadataDownloader = new MetadataDownloader(builder.build().toString(), this);
+                                metadataDownloader.execute(builder.build().toString());
+                            }
+                        }
+                    }
+                }
+            } else {
+                showBuyFullVersionQuestionDialog();
+            }
+            
             return true;
         } else if (id == R.id.action_refresh) {
-        	WebView web_view = (WebView)findViewById(R.id.webview);
+            WebView web_view = (WebView)findViewById(R.id.webview);
 
-        	if (web_view != null) {
-        		web_view.reload();
-        	}
-        	
+            if (web_view != null) {
+                web_view.reload();
+            }
+            
             return true;
         } else if (id == R.id.action_home) {
-        	WebView web_view = (WebView)findViewById(R.id.webview);
+            WebView web_view = (WebView)findViewById(R.id.webview);
 
-        	if (web_view != null) {
-        		web_view.loadUrl("http://m.youtube.com/");
-        	}
-        	
+            if (web_view != null) {
+                web_view.loadUrl("http://m.youtube.com/");
+            }
+            
             return true;
         } else if (id == R.id.action_help) {
-        	WebView web_view = (WebView)findViewById(R.id.webview);
+            WebView web_view = (WebView)findViewById(R.id.webview);
 
-        	if (web_view != null) {
-        		web_view.loadUrl(getString(R.string.uri_help));
-        	}
-        	
+            if (web_view != null) {
+                web_view.loadUrl(getString(R.string.uri_help));
+            }
+            
             return true;
         }
 
@@ -295,254 +295,254 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    	super.onActivityResult(requestCode, resultCode, data);
-    	
-    	if (requestCode == REQUEST_CODE_BUY_INTENT) {
-    		if (data.getIntExtra("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
-        		try {
-    				JSONObject object = new JSONObject(data.getStringExtra("INAPP_PURCHASE_DATA"));
-    				
-    				if (object.getString("productId").equals(IAP_FULL_VERSION_PRODUCT_ID) &&
-    					object.getString("developerPayload").equals(IAP_DEVELOPER_PAYLOAD)) {
-    					isFullVersion = true;
+        super.onActivityResult(requestCode, resultCode, data);
+        
+        if (requestCode == REQUEST_CODE_BUY_INTENT) {
+            if (data.getIntExtra("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
+                try {
+                    JSONObject object = new JSONObject(data.getStringExtra("INAPP_PURCHASE_DATA"));
+                    
+                    if (object.getString("productId").equals(IAP_FULL_VERSION_PRODUCT_ID) &&
+                        object.getString("developerPayload").equals(IAP_DEVELOPER_PAYLOAD)) {
+                        isFullVersion = true;
 
-				    	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-				    	
-				    	editor.putBoolean("FullVersion", isFullVersion);
-				    	editor.commit();
-    				}
-    			} catch (Exception ex) {
-    				showToast(getString(R.string.toast_message_purchase_failed));
-    			}
-    		} else {
-    			showToast(getString(R.string.toast_message_purchase_failed));
-    		}
-    	}
+                        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+                        
+                        editor.putBoolean("FullVersion", isFullVersion);
+                        editor.commit();
+                    }
+                } catch (Exception ex) {
+                    showToast(getString(R.string.toast_message_purchase_failed));
+                }
+            } else {
+                showToast(getString(R.string.toast_message_purchase_failed));
+            }
+        }
     }
     
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-    	WebView web_view = (WebView)findViewById(R.id.webview);
-    	
-    	if ((keyCode == KeyEvent.KEYCODE_BACK) && web_view != null && web_view.canGoBack() &&
-    			                                !(web_view.getUrl().equals("http://m.youtube.com/") && web_view.copyBackForwardList().getCurrentIndex() <= 1)) {
-    		web_view.goBack();
-    		
-    		return true;
-    	} else {
-    		return super.onKeyDown(keyCode, event);
-    	}
+        WebView web_view = (WebView)findViewById(R.id.webview);
+        
+        if ((keyCode == KeyEvent.KEYCODE_BACK) && web_view != null && web_view.canGoBack() &&
+                                                !(web_view.getUrl().equals("http://m.youtube.com/") && web_view.copyBackForwardList().getCurrentIndex() <= 1)) {
+            web_view.goBack();
+            
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
     }
 
     @Override
     public void onBuyFullVersionAgree() {
-		if (iapSupported) {
-			try {
-				Bundle        intent_bundle  = iapService.getBuyIntent(3, getPackageName(), IAP_FULL_VERSION_PRODUCT_ID, "inapp", IAP_DEVELOPER_PAYLOAD);
-				PendingIntent pending_intent = intent_bundle.getParcelable("BUY_INTENT");
-				
-				startIntentSenderForResult(pending_intent.getIntentSender(), REQUEST_CODE_BUY_INTENT, new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
-			} catch (Exception ex) {
-				showToast(getString(R.string.toast_message_purchase_failed)); 
-			}
-		} else {
-			showToast(getString(R.string.toast_message_iap_not_supported));
-		}
+        if (iapSupported) {
+            try {
+                Bundle        intent_bundle  = iapService.getBuyIntent(3, getPackageName(), IAP_FULL_VERSION_PRODUCT_ID, "inapp", IAP_DEVELOPER_PAYLOAD);
+                PendingIntent pending_intent = intent_bundle.getParcelable("BUY_INTENT");
+                
+                startIntentSenderForResult(pending_intent.getIntentSender(), REQUEST_CODE_BUY_INTENT, new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
+            } catch (Exception ex) {
+                showToast(getString(R.string.toast_message_purchase_failed)); 
+            }
+        } else {
+            showToast(getString(R.string.toast_message_iap_not_supported));
+        }
     }
     
     @Override
     public void onMetadataProgressCancelled() {
-		if (metadataDownloader != null) {
-    		metadataDownloader.cancel(true);
-		}
+        if (metadataDownloader != null) {
+            metadataDownloader.cancel(true);
+        }
     }
     
     @Override
     public void onFormatSelected(String video_title, String itag, String extension, String url) {
-    	SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-    	
-    	if (!isFullVersion) {
-        	editor.putInt("DownloadAttempt", getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0) + 1);
-    	}
-    	
-    	editor.putString("PreferredITag", itag);
-    	editor.commit();
-    	
-    	String file_name = video_title;
-    	
-    	file_name = file_name.replace('\\', '_');
-    	file_name = file_name.replace('/',  '_');
-    	file_name = file_name.replace(':',  '_');
-    	file_name = file_name.replace(';',  '_');
-    	file_name = file_name.replace('*',  '_');
-    	file_name = file_name.replace('+',  '_');
-    	file_name = file_name.replace('?',  '_');
-    	file_name = file_name.replace('"',  '_');
-    	file_name = file_name.replace('\'', '_');
-    	file_name = file_name.replace('>',  '_');
-    	file_name = file_name.replace('<',  '_');
-    	file_name = file_name.replace('[',  '_');
-    	file_name = file_name.replace(']',  '_');
-    	file_name = file_name.replace('|',  '_');
-    	
-    	file_name = file_name + "." + extension;
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        
+        if (!isFullVersion) {
+            editor.putInt("DownloadAttempt", getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0) + 1);
+        }
+        
+        editor.putString("PreferredITag", itag);
+        editor.commit();
+        
+        String file_name = video_title;
+        
+        file_name = file_name.replace('\\', '_');
+        file_name = file_name.replace('/',  '_');
+        file_name = file_name.replace(':',  '_');
+        file_name = file_name.replace(';',  '_');
+        file_name = file_name.replace('*',  '_');
+        file_name = file_name.replace('+',  '_');
+        file_name = file_name.replace('?',  '_');
+        file_name = file_name.replace('"',  '_');
+        file_name = file_name.replace('\'', '_');
+        file_name = file_name.replace('>',  '_');
+        file_name = file_name.replace('<',  '_');
+        file_name = file_name.replace('[',  '_');
+        file_name = file_name.replace(']',  '_');
+        file_name = file_name.replace('|',  '_');
+        
+        file_name = file_name + "." + extension;
     
-		DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
-		
-		if (manager != null) {
-			if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-				try {
-					Request request = new Request(Uri.parse(url));
+        DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+        
+        if (manager != null) {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                try {
+                    Request request = new Request(Uri.parse(url));
 
-					request.setDescription(file_name);
-					request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, file_name);
-					request.allowScanningByMediaScanner();
+                    request.setDescription(file_name);
+                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, file_name);
+                    request.allowScanningByMediaScanner();
 
-					manager.enqueue(request);
+                    manager.enqueue(request);
 
-					showToast(getString(R.string.toast_message_download_started));
-				} catch (Exception ex) {
-					showToast(getString(R.string.toast_message_download_failed));
-				}
-			} else {
-				showToast(getString(R.string.toast_message_media_unavailable));
-			}
-		} else {
-			showToast(getString(R.string.toast_message_download_failed));
-		}
+                    showToast(getString(R.string.toast_message_download_started));
+                } catch (Exception ex) {
+                    showToast(getString(R.string.toast_message_download_failed));
+                }
+            } else {
+                showToast(getString(R.string.toast_message_media_unavailable));
+            }
+        } else {
+            showToast(getString(R.string.toast_message_download_failed));
+        }
     }
     
     @Override
     public void onMetadataDownloadComplete(String metadata) {
-    	metadataDownloader = null;
-    	
-    	dismissDialog();
+        metadataDownloader = null;
+        
+        dismissDialog();
 
-    	if (metadata != null) {
-    		Uri metadata_uri = Uri.parse("http://localhost/?" + metadata);
-    		
-    		String video_title = metadata_uri.getQueryParameter("title");
-    		
-    		if (video_title == null) {
-    			video_title = "video";
-    		}
-    		
-    		String url_encoded_fmt_stream_map = metadata_uri.getQueryParameter("url_encoded_fmt_stream_map");
-    		
-    		if (url_encoded_fmt_stream_map != null) {
-    			ArrayList<String> itags      = new ArrayList<String>();
-    			ArrayList<String> formats    = new ArrayList<String>();
-    			ArrayList<String> extensions = new ArrayList<String>();
-    			ArrayList<String> urls       = new ArrayList<String>();
-    			
-    			String[] splitted = url_encoded_fmt_stream_map.split(",");
-    			
-    			for (int i = 0; i < splitted.length; i++) {
-    				Uri item_uri = Uri.parse("http://localhost/?" + splitted[i]);
-    				
-    				String itag = item_uri.getQueryParameter("itag");
-    				String url  = item_uri.getQueryParameter("url");
-    				String sig  = item_uri.getQueryParameter("sig");
+        if (metadata != null) {
+            Uri metadata_uri = Uri.parse("http://localhost/?" + metadata);
+            
+            String video_title = metadata_uri.getQueryParameter("title");
+            
+            if (video_title == null) {
+                video_title = "video";
+            }
+            
+            String url_encoded_fmt_stream_map = metadata_uri.getQueryParameter("url_encoded_fmt_stream_map");
+            
+            if (url_encoded_fmt_stream_map != null) {
+                ArrayList<String> itags      = new ArrayList<String>();
+                ArrayList<String> formats    = new ArrayList<String>();
+                ArrayList<String> extensions = new ArrayList<String>();
+                ArrayList<String> urls       = new ArrayList<String>();
+                
+                String[] splitted = url_encoded_fmt_stream_map.split(",");
+                
+                for (int i = 0; i < splitted.length; i++) {
+                    Uri item_uri = Uri.parse("http://localhost/?" + splitted[i]);
+                    
+                    String itag = item_uri.getQueryParameter("itag");
+                    String url  = item_uri.getQueryParameter("url");
+                    String sig  = item_uri.getQueryParameter("sig");
 
-    				if (itag != null && url != null) {
-        				Uri url_uri = Uri.parse(url);
-        				
-        				if (url_uri.getQueryParameter("signature") == null && sig != null) {
-        					try {
-        						url = url + "&signature=" + URLEncoder.encode(sig, "UTF-8");
-        					} catch (Exception ex) {
-        						// Ignored
-        					}
-        				}
-        				
-        				if (itag.equals("22")) {
-        					itags.add     (itag);
-        					formats.add   ("MP4 (H.264 720p HD)");
-        					extensions.add("mp4");
-        					urls.add      (url);
-        				} else if (itag.equals("18")) {
-        					itags.add     (itag);
-        					formats.add   ("MP4 (H.264 360p)");
-        					extensions.add("mp4");
-        					urls.add      (url);
-        				} else if (itag.equals("5")) {
-        					itags.add     (itag);
-        					formats.add   ("FLV (H.263 240p)");
-        					extensions.add("flv");
-        					urls.add      (url);
-        				} else if (itag.equals("36")) {
-        					itags.add     (itag);
-        					formats.add   ("3GP (MPEG-4 240p)");
-        					extensions.add("3gp");
-        					urls.add      (url);
-        				} else if (itag.equals("17")) {
-        					itags.add     (itag);
-        					formats.add   ("3GP (MPEG-4 144p)");
-        					extensions.add("3gp");
-        					urls.add      (url);
-        				}
-    				}
-    			}
-    			
-    			if (itags.size() != 0) {
-    				showFormatSelectionDialog(video_title, itags, formats, extensions, urls);
-    			} else {
-    				showToast(getString(R.string.toast_message_no_valid_formats));
-    			}
-    		} else {
-				showToast(getString(R.string.toast_message_no_valid_formats));
-    		}
-    	} else {
-    		showToast(getString(R.string.toast_message_operation_cancelled));
-    	}
+                    if (itag != null && url != null) {
+                        Uri url_uri = Uri.parse(url);
+                        
+                        if (url_uri.getQueryParameter("signature") == null && sig != null) {
+                            try {
+                                url = url + "&signature=" + URLEncoder.encode(sig, "UTF-8");
+                            } catch (Exception ex) {
+                                // Ignored
+                            }
+                        }
+                        
+                        if (itag.equals("22")) {
+                            itags.add     (itag);
+                            formats.add   ("MP4 (H.264 720p HD)");
+                            extensions.add("mp4");
+                            urls.add      (url);
+                        } else if (itag.equals("18")) {
+                            itags.add     (itag);
+                            formats.add   ("MP4 (H.264 360p)");
+                            extensions.add("mp4");
+                            urls.add      (url);
+                        } else if (itag.equals("5")) {
+                            itags.add     (itag);
+                            formats.add   ("FLV (H.263 240p)");
+                            extensions.add("flv");
+                            urls.add      (url);
+                        } else if (itag.equals("36")) {
+                            itags.add     (itag);
+                            formats.add   ("3GP (MPEG-4 240p)");
+                            extensions.add("3gp");
+                            urls.add      (url);
+                        } else if (itag.equals("17")) {
+                            itags.add     (itag);
+                            formats.add   ("3GP (MPEG-4 144p)");
+                            extensions.add("3gp");
+                            urls.add      (url);
+                        }
+                    }
+                }
+                
+                if (itags.size() != 0) {
+                    showFormatSelectionDialog(video_title, itags, formats, extensions, urls);
+                } else {
+                    showToast(getString(R.string.toast_message_no_valid_formats));
+                }
+            } else {
+                showToast(getString(R.string.toast_message_no_valid_formats));
+            }
+        } else {
+            showToast(getString(R.string.toast_message_operation_cancelled));
+        }
     }
     
     private void showToast(String message) {
-    	Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
     
     private void showBuyFullVersionQuestionDialog() {
-    	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (prev_fragment != null) {
-    		prev_fragment.dismiss();
-    	}
-    	
-    	DialogFragment fragment = CustomDialogFragment.newBuyFullVersionQuestionInstance();
-    	
-    	fragment.show(getFragmentManager(), "dialog");
+        DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
+        
+        if (prev_fragment != null) {
+            prev_fragment.dismiss();
+        }
+        
+        DialogFragment fragment = CustomDialogFragment.newBuyFullVersionQuestionInstance();
+        
+        fragment.show(getFragmentManager(), "dialog");
     }
 
     private void showMetadataProgressDialog() {
-    	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (prev_fragment != null) {
-    		prev_fragment.dismiss();
-    	}
-    	
-    	DialogFragment fragment = CustomDialogFragment.newMetadataProgressInstance();
-    	
-    	fragment.show(getFragmentManager(), "dialog");
+        DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
+        
+        if (prev_fragment != null) {
+            prev_fragment.dismiss();
+        }
+        
+        DialogFragment fragment = CustomDialogFragment.newMetadataProgressInstance();
+        
+        fragment.show(getFragmentManager(), "dialog");
     }
 
     private void showFormatSelectionDialog(String video_title, ArrayList<String> itags, ArrayList<String> formats, ArrayList<String> extensions, ArrayList<String> urls) {
-    	DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (prev_fragment != null) {
-    		prev_fragment.dismiss();
-    	}
-    	
-    	DialogFragment fragment = CustomDialogFragment.newFormatSelectionInstance(video_title, getPreferences(MODE_PRIVATE).getString("PreferredITag", ""), itags, formats, extensions, urls);
-    	
-    	fragment.show(getFragmentManager(), "dialog");
+        DialogFragment prev_fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
+        
+        if (prev_fragment != null) {
+            prev_fragment.dismiss();
+        }
+        
+        DialogFragment fragment = CustomDialogFragment.newFormatSelectionInstance(video_title, getPreferences(MODE_PRIVATE).getString("PreferredITag", ""), itags, formats, extensions, urls);
+        
+        fragment.show(getFragmentManager(), "dialog");
     }
     
     private void dismissDialog() {
-    	DialogFragment fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
-    	
-    	if (fragment != null) {
-    		fragment.dismiss();
-    	}
+        DialogFragment fragment = (DialogFragment)getFragmentManager().findFragmentByTag("dialog");
+        
+        if (fragment != null) {
+            fragment.dismiss();
+        }
     }
     
     public static class MainFragment extends Fragment {
@@ -555,34 +555,34 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
             WebView web_view  = (WebView)root_view.findViewById(R.id.webview);
 
             web_view.getSettings().setJavaScriptEnabled(true);
-        	web_view.setWebViewClient(new WebViewClient());
+            web_view.setWebViewClient(new WebViewClient());
 
             if (getActivity() != null && getActivity().getWindow().hasFeature(Window.FEATURE_PROGRESS)) {
-            	web_view.setWebChromeClient(new WebChromeClient() {
-            		public void onProgressChanged(WebView view, int progress) {
-            			if (getActivity() != null) {
-            				getActivity().setProgress(progress * 100);
-            			}
-            		}
-            	});
+                web_view.setWebChromeClient(new WebChromeClient() {
+                    public void onProgressChanged(WebView view, int progress) {
+                        if (getActivity() != null) {
+                            getActivity().setProgress(progress * 100);
+                        }
+                    }
+                });
             } else {
-            	web_view.setWebChromeClient(new WebChromeClient());
+                web_view.setWebChromeClient(new WebChromeClient());
             }
-        	
+            
             if (savedInstanceState != null) {
-            	web_view.restoreState(savedInstanceState);
+                web_view.restoreState(savedInstanceState);
             } else {
                 web_view.loadUrl("http://m.youtube.com/");
             }
 
-        	return root_view;
+            return root_view;
         }
         
         @Override
         public void onSaveInstanceState(Bundle outState) {
-        	super.onSaveInstanceState(outState);
-        	
-        	((WebView)getView().findViewById(R.id.webview)).saveState(outState);
+            super.onSaveInstanceState(outState);
+            
+            ((WebView)getView().findViewById(R.id.webview)).saveState(outState);
         }
     }
 }
