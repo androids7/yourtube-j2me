@@ -37,6 +37,7 @@ import android.widget.Toast;
 
 import com.nokia.payment.iap.aidl.INokiaIAPService;
 
+import com.derevenetz.oleg.yourtube.BuildSettings;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment.CustomDialogFragmentListener;
 import com.derevenetz.oleg.yourtube.MetadataDownloader;
@@ -50,21 +51,21 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     private final String       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
                                IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
     
-    private boolean            iapSupported                = false,
+    private boolean            nokiaIAPSupported           = false,
                                isFullVersion               = false;
     private MetadataDownloader metadataDownloader          = null;
-    private INokiaIAPService   iapService                  = null;
+    private INokiaIAPService   nokiaIAPService             = null;
     
-    private ServiceConnection iapServiceConnection = new ServiceConnection() {
+    private ServiceConnection nokiaIAPServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            iapService = INokiaIAPService.Stub.asInterface(service);
+            nokiaIAPService = INokiaIAPService.Stub.asInterface(service);
             
             try {
-                int response = iapService.isBillingSupported(3, getPackageName(), "inapp");
+                int response = nokiaIAPService.isBillingSupported(3, getPackageName(), "inapp");
                 
                 if (response == IAP_RESULT_OK) {
-                    iapSupported = true;
+                    nokiaIAPSupported = true;
                     
                     (new Thread(new Runnable() {
                         @Override
@@ -80,7 +81,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                             
                             do {
                                 try {
-                                    Bundle owned_items = iapService.getPurchases(3, getPackageName(), "inapp", query_products, continuationToken);
+                                    Bundle owned_items = nokiaIAPService.getPurchases(3, getPackageName(), "inapp", query_products, continuationToken);
                                     
                                     if (owned_items.getInt("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
                                         ArrayList<String> owned_products = owned_items.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
@@ -105,16 +106,17 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                         }
                     })).start();
                 } else {
-                    iapSupported = false;
+                    nokiaIAPSupported = false;
                 }
             } catch (Exception ex) {
-                iapSupported = false;
+                nokiaIAPSupported = false;
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
-            iapService = null;
+            nokiaIAPSupported = false;
+            nokiaIAPService   = null;
         }
     };
     
@@ -130,9 +132,13 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
             getFragmentManager().beginTransaction().add(R.id.activity_yourtube, new MainFragment()).commit();
         }
 
-        isFullVersion = getPreferences(MODE_PRIVATE).getBoolean("FullVersion", false);
-        
-        bindService(new Intent("com.nokia.payment.iapenabler.InAppBillingService.BIND"), iapServiceConnection, Context.BIND_AUTO_CREATE);
+        if (BuildSettings.BUILD_FOR_NOKIA_STORE) {
+            isFullVersion = getPreferences(MODE_PRIVATE).getBoolean("FullVersion", false);
+            
+            bindService(new Intent("com.nokia.payment.iapenabler.InAppBillingService.BIND"), nokiaIAPServiceConnection, Context.BIND_AUTO_CREATE);
+        } else {
+            isFullVersion = true;
+        }
     }
 
     @Override
@@ -183,8 +189,8 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
             metadataDownloader = null;
         }
         
-        if (iapServiceConnection != null) {
-            unbindService(iapServiceConnection);
+        if (nokiaIAPServiceConnection != null) {
+            unbindService(nokiaIAPServiceConnection);
         }
     }
     
@@ -336,9 +342,9 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
 
     @Override
     public void onBuyFullVersionAgree() {
-        if (iapSupported) {
+        if (nokiaIAPSupported) {
             try {
-                Bundle        intent_bundle  = iapService.getBuyIntent(3, getPackageName(), IAP_FULL_VERSION_PRODUCT_ID, "inapp", IAP_DEVELOPER_PAYLOAD);
+                Bundle        intent_bundle  = nokiaIAPService.getBuyIntent(3, getPackageName(), IAP_FULL_VERSION_PRODUCT_ID, "inapp", IAP_DEVELOPER_PAYLOAD);
                 PendingIntent pending_intent = intent_bundle.getParcelable("BUY_INTENT");
                 
                 startIntentSenderForResult(pending_intent.getIntentSender(), REQUEST_CODE_BUY_INTENT, new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
