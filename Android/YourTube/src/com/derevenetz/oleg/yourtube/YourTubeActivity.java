@@ -189,7 +189,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
             metadataDownloader = null;
         }
         
-        if (nokiaIAPServiceConnection != null) {
+        if (nokiaIAPService != null) {
             unbindService(nokiaIAPServiceConnection);
         }
     }
