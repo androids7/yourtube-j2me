@@ -515,7 +515,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     public void onFormatSelected(String video_title, String itag, String extension, String url, boolean is_worst_format) {
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
 
-        if (!isFullVersion && is_worst_format) {
+        if (isFullVersion || is_worst_format) {
             if (!isFullVersion) {
                 editor.putInt("DownloadAttempt", getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0) + 1);
             }
