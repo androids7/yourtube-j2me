@@ -50,7 +50,8 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                                                IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
     
     private boolean                            nokiaIAPSupported           = false,
-                                               isFullVersion               = false;
+                                               isFullVersion               = false,
+                                               isOptionsMenuEnabled        = true;
     private FrameLayout                        activityContentView         = null;
     private View                               webCustomView               = null;
     private FrameLayout                        webCustomViewContainer      = null;
@@ -167,6 +168,10 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                         webCustomViewContainer.setVisibility(View.VISIBLE);
                         
                         setContentView(webCustomViewContainer);
+
+                        isOptionsMenuEnabled = false;
+                        
+                        invalidateOptionsMenu();
                     }
                 }
                 
@@ -183,7 +188,11 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                         activityContentView.setVisibility(View.VISIBLE);
                         
                         setContentView(activityContentView);
-                        
+
+                        isOptionsMenuEnabled = true;
+
+                        invalidateOptionsMenu();
+
                         activityContentView    = null;
                         webCustomView          = null;
                         webCustomViewContainer = null;
@@ -325,6 +334,15 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         getMenuInflater().inflate(R.menu.your_tube, menu);
 
         return true;
+    }
+
+    @Override
+    public boolean onPrepareOptionsMenu (Menu menu) {
+        if (isOptionsMenuEnabled) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
