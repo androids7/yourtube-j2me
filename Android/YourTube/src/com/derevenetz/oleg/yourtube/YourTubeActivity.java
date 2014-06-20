@@ -294,6 +294,10 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                 web_view.onPause();
             }
         }
+        
+        if (webCustomView != null && webChromeClient != null) {
+            webChromeClient.onHideCustomView();
+        }
     }
     
     @Override
