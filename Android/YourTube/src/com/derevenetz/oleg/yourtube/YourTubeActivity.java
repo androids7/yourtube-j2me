@@ -2,6 +2,7 @@ package com.derevenetz.oleg.yourtube;
 
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -34,7 +35,6 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.nokia.payment.iap.aidl.INokiaIAPService;
-
 import com.derevenetz.oleg.yourtube.BuildSettings;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment;
 import com.derevenetz.oleg.yourtube.CustomDialogFragment.CustomDialogFragmentListener;
@@ -593,6 +593,8 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                 ArrayList<String> extensions = new ArrayList<String>();
                 ArrayList<String> urls       = new ArrayList<String>();
                 
+                HashMap<String, String> itag_to_url = new HashMap<String, String>();
+                
                 String[] splitted = url_encoded_fmt_stream_map.split(",");
                 
                 for (int i = 0; i < splitted.length; i++) {
@@ -613,33 +615,39 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                             }
                         }
                         
-                        if (itag.equals("22")) {
-                            itags.add     (itag);
-                            formats.add   ("MP4 (H.264 720p HD)");
-                            extensions.add("mp4");
-                            urls.add      (url);
-                        } else if (itag.equals("18")) {
-                            itags.add     (itag);
-                            formats.add   ("MP4 (H.264 360p)");
-                            extensions.add("mp4");
-                            urls.add      (url);
-                        } else if (itag.equals("5")) {
-                            itags.add     (itag);
-                            formats.add   ("FLV (H.263 240p)");
-                            extensions.add("flv");
-                            urls.add      (url);
-                        } else if (itag.equals("36")) {
-                            itags.add     (itag);
-                            formats.add   ("3GP (MPEG-4 240p)");
-                            extensions.add("3gp");
-                            urls.add      (url);
-                        } else if (itag.equals("17")) {
-                            itags.add     (itag);
-                            formats.add   ("3GP (MPEG-4 144p)");
-                            extensions.add("3gp");
-                            urls.add      (url);
-                        }
+                        itag_to_url.put(itag, url);
                     }
+                }
+                
+                if (itag_to_url.containsKey("22")) {
+                    itags.add     ("22");
+                    formats.add   ("MP4 (H.264 720p HD)");
+                    extensions.add("mp4");
+                    urls.add      (itag_to_url.get("22"));
+                } 
+                if (itag_to_url.containsKey("18")) {
+                    itags.add     ("18");
+                    formats.add   ("MP4 (H.264 360p)");
+                    extensions.add("mp4");
+                    urls.add      (itag_to_url.get("18"));
+                }
+                if (itag_to_url.containsKey("5")) {
+                    itags.add     ("5");
+                    formats.add   ("FLV (H.263 240p)");
+                    extensions.add("flv");
+                    urls.add      (itag_to_url.get("5"));
+                }
+                if (itag_to_url.containsKey("36")) {
+                    itags.add     ("36");
+                    formats.add   ("3GP (MPEG-4 240p)");
+                    extensions.add("3gp");
+                    urls.add      (itag_to_url.get("36"));
+                }
+                if (itag_to_url.containsKey("17")) {
+                    itags.add     ("17");
+                    formats.add   ("3GP (MPEG-4 144p)");
+                    extensions.add("3gp");
+                    urls.add      (itag_to_url.get("17"));
                 }
                 
                 if (itags.size() != 0) {
