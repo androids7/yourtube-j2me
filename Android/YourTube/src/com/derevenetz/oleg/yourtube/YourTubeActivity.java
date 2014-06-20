@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.app.DialogFragment;
 import android.app.DownloadManager;
 import android.app.DownloadManager.Request;
-import android.app.Fragment;
 import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
@@ -24,15 +23,14 @@ import android.os.Environment;
 import android.os.IBinder;
 import android.text.TextUtils;
 import android.view.KeyEvent;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import com.nokia.payment.iap.aidl.INokiaIAPService;
@@ -44,17 +42,22 @@ import com.derevenetz.oleg.yourtube.MetadataDownloader;
 import com.derevenetz.oleg.yourtube.MetadataDownloader.MetadataDownloaderListener;
 
 public class YourTubeActivity extends Activity implements MetadataDownloaderListener, CustomDialogFragmentListener {
-    private final int          MAX_FREE_DOWNLOAD_ATTEMPTS  = 3,
-                               IAP_RESULT_OK               = 0,
-                               REQUEST_CODE_BUY_INTENT     = 1000;
+    private final int                          MAX_FREE_DOWNLOAD_ATTEMPTS  = 3,
+                                               IAP_RESULT_OK               = 0,
+                                               REQUEST_CODE_BUY_INTENT     = 1000;
     
-    private final String       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
-                               IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
+    private final String                       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
+                                               IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
     
-    private boolean            nokiaIAPSupported           = false,
-                               isFullVersion               = false;
-    private MetadataDownloader metadataDownloader          = null;
-    private INokiaIAPService   nokiaIAPService             = null;
+    private boolean                            nokiaIAPSupported           = false,
+                                               isFullVersion               = false;
+    private FrameLayout                        activityContentView         = null;
+    private View                               webCustomView               = null;
+    private FrameLayout                        webCustomViewContainer      = null;
+    private WebChromeClient.CustomViewCallback webCustomViewCallback       = null;
+    private WebChromeClient                    webChromeClient             = null;
+    private MetadataDownloader                 metadataDownloader          = null;
+    private INokiaIAPService                   nokiaIAPService             = null;
     
     private ServiceConnection nokiaIAPServiceConnection = new ServiceConnection() {
         @Override
@@ -128,8 +131,85 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         
         setContentView(R.layout.activity_yourtube);
 
-        if (savedInstanceState == null) {
-            getFragmentManager().beginTransaction().add(R.id.activity_yourtube, new MainFragment()).commit();
+        WebView web_view = (WebView)findViewById(R.id.webview);
+
+        if (web_view != null) {
+            web_view.getSettings().setJavaScriptEnabled(true);
+            web_view.setWebViewClient(new WebViewClient());
+            
+            webChromeClient = new WebChromeClient() {
+                @Override
+                public void onProgressChanged(WebView view, int progress) {
+                    if (getWindow().hasFeature(Window.FEATURE_PROGRESS)) {
+                        setProgress(progress * 100);
+                    }
+                }
+
+                @Override
+                public void onShowCustomView(View view, CustomViewCallback callback) {
+                    if (webCustomView != null) {
+                        callback.onCustomViewHidden();
+                    } else {
+                        activityContentView = (FrameLayout)findViewById(R.id.activity_yourtube);
+                        activityContentView.setVisibility(View.GONE);
+
+                        view.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                                                                          FrameLayout.LayoutParams.MATCH_PARENT));
+
+                        webCustomView         = view;
+                        webCustomViewCallback = callback;
+
+                        webCustomViewContainer = new FrameLayout(YourTubeActivity.this);
+                        webCustomViewContainer.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                                                                                            FrameLayout.LayoutParams.MATCH_PARENT));
+                        webCustomViewContainer.setBackgroundResource(android.R.color.black);
+                        webCustomViewContainer.addView(view);
+                        webCustomViewContainer.setVisibility(View.VISIBLE);
+                        
+                        setContentView(webCustomViewContainer);
+                    }
+                }
+                
+                @Override
+                public void onHideCustomView() {
+                    if (webCustomView != null) {
+                        webCustomView.setVisibility(View.GONE);
+                        
+                        webCustomViewContainer.removeView(webCustomView);
+                        webCustomViewContainer.setVisibility(View.GONE);
+                        
+                        webCustomViewCallback.onCustomViewHidden();
+                        
+                        activityContentView.setVisibility(View.VISIBLE);
+                        
+                        setContentView(activityContentView);
+                        
+                        activityContentView    = null;
+                        webCustomView          = null;
+                        webCustomViewContainer = null;
+                        webCustomViewCallback  = null;
+                    }
+                }
+
+                @Override
+                public View getVideoLoadingProgressView() {
+                    FrameLayout layout = new FrameLayout(YourTubeActivity.this);
+                    
+                    layout.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT,
+                                                                        FrameLayout.LayoutParams.MATCH_PARENT));
+                    webCustomViewContainer.setBackgroundResource(android.R.color.black);
+                    
+                    return layout;
+                }
+            };
+
+            web_view.setWebChromeClient(webChromeClient);
+
+            if (savedInstanceState != null) {
+                web_view.restoreState(savedInstanceState);
+            } else {
+                web_view.loadUrl("http://m.youtube.com/");
+            }
         }
 
         if (BuildSettings.BUILD_FOR_NOKIA_STORE) {
@@ -164,7 +244,19 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         }
         
         super.onSaveInstanceState(outState);
-        
+
+        WebView web_view = (WebView)findViewById(R.id.webview);
+
+        if (web_view != null) {
+            web_view.saveState(outState);
+        } else if (activityContentView != null) {
+            web_view = (WebView)activityContentView.findViewById(R.id.webview);
+            
+            if (web_view != null) {
+                web_view.saveState(outState);
+            }
+        }
+
         if (metadataDownloader != null) {
             outState.putBoolean("YourTubeActivity.metadataDownloaderRunning", true);
             outState.putString ("YourTubeActivity.metadataDownloaderURL",     metadataDownloader.getUrl());
@@ -178,6 +270,40 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         }
     }
     
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        WebView web_view = (WebView)findViewById(R.id.webview);
+
+        if (web_view != null) {
+            web_view.onPause();
+        } else if (activityContentView != null) {
+            web_view = (WebView)activityContentView.findViewById(R.id.webview);
+            
+            if (web_view != null) {
+                web_view.onPause();
+            }
+        }
+    }
+    
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        WebView web_view = (WebView)findViewById(R.id.webview);
+
+        if (web_view != null) {
+            web_view.onResume();
+        } else if (activityContentView != null) {
+            web_view = (WebView)activityContentView.findViewById(R.id.webview);
+            
+            if (web_view != null) {
+                web_view.onResume();
+            }
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -250,11 +376,11 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                             Uri.Builder builder = new Uri.Builder();
 
                             builder.scheme("http").authority("www.youtube.com").appendPath("get_video_info").appendQueryParameter("video_id", video_id)
-                                                                                                            .appendQueryParameter("el", "detailpage")
-                                                                                                            .appendQueryParameter("ps", "default")
-                                                                                                            .appendQueryParameter("eurl", "")
-                                                                                                            .appendQueryParameter("gl", "US")
-                                                                                                            .appendQueryParameter("hl", "en");
+                                                                                                            .appendQueryParameter("el",       "detailpage")
+                                                                                                            .appendQueryParameter("ps",       "default")
+                                                                                                            .appendQueryParameter("eurl",     "")
+                                                                                                            .appendQueryParameter("gl",       "US")
+                                                                                                            .appendQueryParameter("hl",       "en");
                             
                             if (metadataDownloader == null) {
                                 showMetadataProgressDialog();
@@ -329,12 +455,20 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         WebView web_view = (WebView)findViewById(R.id.webview);
-        
-        if ((keyCode == KeyEvent.KEYCODE_BACK) && web_view != null && web_view.canGoBack() &&
-                                                !(web_view.getUrl().equals("http://m.youtube.com/") && web_view.copyBackForwardList().getCurrentIndex() <= 1)) {
-            web_view.goBack();
-            
-            return true;
+
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            if (webCustomView != null && webChromeClient != null) {
+                webChromeClient.onHideCustomView();
+                
+                return true;
+            } else if (web_view != null && web_view.canGoBack() && !(web_view.getUrl().equals("http://m.youtube.com/") &&
+                                                                     web_view.copyBackForwardList().getCurrentIndex() <= 1)) {
+                web_view.goBack();
+                
+                return true;
+            } else {
+                return super.onKeyDown(keyCode, event);
+            }
         } else {
             return super.onKeyDown(keyCode, event);
         }
@@ -548,47 +682,6 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         
         if (fragment != null) {
             fragment.dismiss();
-        }
-    }
-    
-    public static class MainFragment extends Fragment {
-        public MainFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-            View    root_view = inflater.inflate(R.layout.fragment_main, container, false);
-            WebView web_view  = (WebView)root_view.findViewById(R.id.webview);
-
-            web_view.getSettings().setJavaScriptEnabled(true);
-            web_view.setWebViewClient(new WebViewClient());
-
-            if (getActivity() != null && getActivity().getWindow().hasFeature(Window.FEATURE_PROGRESS)) {
-                web_view.setWebChromeClient(new WebChromeClient() {
-                    public void onProgressChanged(WebView view, int progress) {
-                        if (getActivity() != null) {
-                            getActivity().setProgress(progress * 100);
-                        }
-                    }
-                });
-            } else {
-                web_view.setWebChromeClient(new WebChromeClient());
-            }
-            
-            if (savedInstanceState != null) {
-                web_view.restoreState(savedInstanceState);
-            } else {
-                web_view.loadUrl("http://m.youtube.com/");
-            }
-
-            return root_view;
-        }
-        
-        @Override
-        public void onSaveInstanceState(Bundle outState) {
-            super.onSaveInstanceState(outState);
-            
-            ((WebView)getView().findViewById(R.id.webview)).saveState(outState);
         }
     }
 }
