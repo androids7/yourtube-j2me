@@ -18,7 +18,7 @@ public class CustomDialogFragment extends DialogFragment {
     public static interface CustomDialogFragmentListener {
         public abstract void onBuyFullVersionAgree();
         public abstract void onMetadataProgressCancelled();
-        public abstract void onFormatSelected(String video_title, String itag, String extension, String url);
+        public abstract void onFormatSelected(String video_title, String itag, String extension, String url, boolean is_worst_format);
     }
     
     public static CustomDialogFragment newMessageInstance(String title, String message) {
@@ -59,18 +59,19 @@ public class CustomDialogFragment extends DialogFragment {
         return fragment;
     }
     
-    public static CustomDialogFragment newFormatSelectionInstance(String video_title, String preferred_itag, ArrayList<String> itags, ArrayList<String> formats, ArrayList<String> extensions, ArrayList<String> urls) {
+    public static CustomDialogFragment newFormatSelectionInstance(String video_title, String preferred_itag, ArrayList<String> itags, ArrayList<String> formats, ArrayList<String> extensions, ArrayList<String> urls, boolean prefer_worst_format) {
         CustomDialogFragment fragment = new CustomDialogFragment();
         
         Bundle args = new Bundle();
         
-        args.putInt            ("type",           TYPE_FORMAT_SELECTION);
-        args.putString         ("video_title",    video_title);
-        args.putString         ("preferred_itag", preferred_itag);
-        args.putStringArrayList("itags",          itags);
-        args.putStringArrayList("formats",        formats);
-        args.putStringArrayList("extensions",     extensions);
-        args.putStringArrayList("urls",           urls);
+        args.putInt            ("type",                TYPE_FORMAT_SELECTION);
+        args.putString         ("video_title",         video_title);
+        args.putString         ("preferred_itag",      preferred_itag);
+        args.putStringArrayList("itags",               itags);
+        args.putStringArrayList("formats",             formats);
+        args.putStringArrayList("extensions",          extensions);
+        args.putStringArrayList("urls",                urls);
+        args.putBoolean        ("prefer_worst_format", prefer_worst_format);
         
         fragment.setArguments(args);
         
@@ -112,10 +113,11 @@ public class CustomDialogFragment extends DialogFragment {
 
             return dialog;
         } else if (getArguments().getInt("type") == TYPE_FORMAT_SELECTION) {
-            ArrayList<String> itags   = getArguments().getStringArrayList("itags");
-            ArrayList<String> formats = getArguments().getStringArrayList("formats");
+            boolean           prefer_worst_format = getArguments().getBoolean("prefer_worst_format"); 
+            ArrayList<String> itags               = getArguments().getStringArrayList("itags");
+            ArrayList<String> formats             = getArguments().getStringArrayList("formats");
 
-            int      checked_item = 0;
+            int      checked_item = formats.size() > 0 ? 0 : -1;
             String[] choices      = new String[formats.size()];
 
             for (int i = 0; i < formats.size(); i++) {
@@ -124,6 +126,10 @@ public class CustomDialogFragment extends DialogFragment {
                 }
 
                 choices[i] = formats.get(i);
+            }
+
+            if (prefer_worst_format) {
+                checked_item = formats.size() - 1;
             }
             
             AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -143,7 +149,7 @@ public class CustomDialogFragment extends DialogFragment {
                     
                     if (position >= 0 && position < itags.size()) {
                         if (activity != null) {
-                            activity.onFormatSelected(getArguments().getString("video_title"), itags.get(position), extensions.get(position), urls.get(position));
+                            activity.onFormatSelected(getArguments().getString("video_title"), itags.get(position), extensions.get(position), urls.get(position), position == itags.size() - 1);
                         }
                     }
                 }

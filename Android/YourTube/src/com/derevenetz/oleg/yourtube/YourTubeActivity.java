@@ -331,7 +331,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.your_tube, menu);
+        getMenuInflater().inflate(R.menu.menu_yourtube, menu);
 
         return true;
     }
@@ -354,12 +354,8 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
             
             if (isFullVersion || download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS) {
                 if (!isFullVersion) {
-                    if (download_attempt < MAX_FREE_DOWNLOAD_ATTEMPTS - 1) {
-                        showToast(String.format(getString(R.string.toast_message_trial_attempts_remaining),
-                                  Integer.toString(MAX_FREE_DOWNLOAD_ATTEMPTS - download_attempt - 1)));
-                    } else {
-                        showToast(getString(R.string.toast_message_trial_last_attempt));
-                    }
+                    showToast(String.format(getString(R.string.toast_message_trial_mode),
+                                            Integer.toString(MAX_FREE_DOWNLOAD_ATTEMPTS - download_attempt)));
                 }
                 
                 WebView web_view = (WebView)findViewById(R.id.webview);
@@ -516,57 +512,61 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
     
     @Override
-    public void onFormatSelected(String video_title, String itag, String extension, String url) {
+    public void onFormatSelected(String video_title, String itag, String extension, String url, boolean is_worst_format) {
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
-        
-        if (!isFullVersion) {
-            editor.putInt("DownloadAttempt", getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0) + 1);
-        }
-        
-        editor.putString("PreferredITag", itag);
-        editor.commit();
-        
-        String file_name = video_title;
-        
-        file_name = file_name.replace('\\', '_');
-        file_name = file_name.replace('/',  '_');
-        file_name = file_name.replace(':',  '_');
-        file_name = file_name.replace(';',  '_');
-        file_name = file_name.replace('*',  '_');
-        file_name = file_name.replace('+',  '_');
-        file_name = file_name.replace('?',  '_');
-        file_name = file_name.replace('"',  '_');
-        file_name = file_name.replace('\'', '_');
-        file_name = file_name.replace('>',  '_');
-        file_name = file_name.replace('<',  '_');
-        file_name = file_name.replace('[',  '_');
-        file_name = file_name.replace(']',  '_');
-        file_name = file_name.replace('|',  '_');
-        
-        file_name = file_name + "." + extension;
-    
-        DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
-        
-        if (manager != null) {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                try {
-                    Request request = new Request(Uri.parse(url));
 
-                    request.setDescription(file_name);
-                    request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, file_name);
-                    request.allowScanningByMediaScanner();
+        if (!isFullVersion && is_worst_format) {
+            if (!isFullVersion) {
+                editor.putInt("DownloadAttempt", getPreferences(MODE_PRIVATE).getInt("DownloadAttempt", 0) + 1);
+            }
+            
+            editor.putString("PreferredITag", itag);
+            editor.commit();
+            
+            String file_name = video_title;
+            
+            file_name = file_name.replace('\\', '_');
+            file_name = file_name.replace('/',  '_');
+            file_name = file_name.replace(':',  '_');
+            file_name = file_name.replace(';',  '_');
+            file_name = file_name.replace('*',  '_');
+            file_name = file_name.replace('+',  '_');
+            file_name = file_name.replace('?',  '_');
+            file_name = file_name.replace('"',  '_');
+            file_name = file_name.replace('\'', '_');
+            file_name = file_name.replace('>',  '_');
+            file_name = file_name.replace('<',  '_');
+            file_name = file_name.replace('[',  '_');
+            file_name = file_name.replace(']',  '_');
+            file_name = file_name.replace('|',  '_');
+            
+            file_name = file_name + "." + extension;
+        
+            DownloadManager manager = (DownloadManager)getSystemService(DOWNLOAD_SERVICE);
+            
+            if (manager != null) {
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                    try {
+                        Request request = new Request(Uri.parse(url));
 
-                    manager.enqueue(request);
+                        request.setDescription(file_name);
+                        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, file_name);
+                        request.allowScanningByMediaScanner();
 
-                    showToast(getString(R.string.toast_message_download_started));
-                } catch (Exception ex) {
-                    showToast(getString(R.string.toast_message_download_failed));
+                        manager.enqueue(request);
+
+                        showToast(getString(R.string.toast_message_download_started));
+                    } catch (Exception ex) {
+                        showToast(getString(R.string.toast_message_download_failed));
+                    }
+                } else {
+                    showToast(getString(R.string.toast_message_media_unavailable));
                 }
             } else {
-                showToast(getString(R.string.toast_message_media_unavailable));
+                showToast(getString(R.string.toast_message_download_failed));
             }
         } else {
-            showToast(getString(R.string.toast_message_download_failed));
+            showBuyFullVersionQuestionDialog();
         }
     }
     
@@ -697,10 +697,16 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         if (prev_fragment != null) {
             prev_fragment.dismiss();
         }
-        
-        DialogFragment fragment = CustomDialogFragment.newFormatSelectionInstance(video_title, getPreferences(MODE_PRIVATE).getString("PreferredITag", ""), itags, formats, extensions, urls);
-        
-        fragment.show(getFragmentManager(), "dialog");
+
+        if (isFullVersion) {
+            DialogFragment fragment = CustomDialogFragment.newFormatSelectionInstance(video_title, getPreferences(MODE_PRIVATE).getString("PreferredITag", ""), itags, formats, extensions, urls, false);
+            
+            fragment.show(getFragmentManager(), "dialog");
+        } else {
+            DialogFragment fragment = CustomDialogFragment.newFormatSelectionInstance(video_title, getPreferences(MODE_PRIVATE).getString("PreferredITag", ""), itags, formats, extensions, urls, true);
+            
+            fragment.show(getFragmentManager(), "dialog");
+        }
     }
     
     private void dismissDialog() {
