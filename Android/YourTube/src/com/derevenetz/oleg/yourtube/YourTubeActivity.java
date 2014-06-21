@@ -322,9 +322,9 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         super.onRestoreInstanceState(savedInstanceState);
         
         if (savedInstanceState.getBoolean("YourTubeActivity.metadataDownloaderRunning", false)) {
+            String url = savedInstanceState.getString("YourTubeActivity.metadataDownloaderURL", "");
+
             if (metadataDownloader == null) {
-                String url = savedInstanceState.getString ("YourTubeActivity.metadataDownloaderURL", "");
-                
                 showMetadataProgressDialog();
 
                 metadataDownloader = new MetadataDownloader(url, this);
