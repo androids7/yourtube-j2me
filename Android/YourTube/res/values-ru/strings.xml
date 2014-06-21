@@ -16,7 +16,7 @@
     <string name="toast_message_download_failed">Ошибка загрузки видео, запрос к сервису загрузки вернул ошибку</string>
     <string name="toast_message_purchase_failed">Ошибка при покупке</string>
     <string name="toast_message_iap_not_supported">Покупка внутри приложений не поддерживается на данном устройстве</string>
-    <string name="toast_message_trial_mode">Приложение работает в пробном режиме. Вы можете скачивать видео только в низком качестве, количество закачек ограничено. Осталось закачек: %s</string>
+    <string name="toast_message_trial_mode">Приложение работает в пробном режиме, количество закачек и доступных видеоформатов ограничено. Осталось закачек: %s</string>
     <string name="button_ok">OK</string>
     <string name="button_yes">Да</string>
     <string name="button_no">Нет</string>

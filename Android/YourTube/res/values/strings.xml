@@ -16,7 +16,7 @@
     <string name="toast_message_download_failed">Video download failed, request to download service returned error</string>
     <string name="toast_message_purchase_failed">Purchase attempt failed</string>
     <string name="toast_message_iap_not_supported">In-App purchases are not supported on this device</string>
-    <string name="toast_message_trial_mode">Application is in trial mode. Only low-quality video format is available for download, number of download attempts is limited. Download attempts remaining: %s</string>
+    <string name="toast_message_trial_mode">Application is in trial mode, number of download attempts and available video formats is limited. Download attempts remaining: %s</string>
     <string name="button_ok">OK</string>
     <string name="button_yes">Yes</string>
     <string name="button_no">No</string>
