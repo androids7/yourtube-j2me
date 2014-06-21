@@ -8,7 +8,7 @@
     <string name="dialog_title_loading_metadata">Loading video metadata</string>
     <string name="dialog_title_choose_format">Choose desired video format</string>
     <string name="dialog_title_buy_full_version">Buy full version</string>
-    <string name="dialog_message_buy_full_version">This operation is not available in trial version. Do you want to buy a full unlimited version of this app?</string>
+    <string name="dialog_message_buy_full_version">This operation is not available in trial version. Do you want to buy full unlimited version of this app?</string>
     <string name="toast_message_no_valid_formats">No valid video formats found</string>
     <string name="toast_message_operation_cancelled">Operation was cancelled by user</string>
     <string name="toast_message_download_started">Video download started</string>
