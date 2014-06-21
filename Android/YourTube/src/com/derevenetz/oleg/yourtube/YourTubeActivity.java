@@ -42,23 +42,23 @@ import com.derevenetz.oleg.yourtube.MetadataDownloader;
 import com.derevenetz.oleg.yourtube.MetadataDownloader.MetadataDownloaderListener;
 
 public class YourTubeActivity extends Activity implements MetadataDownloaderListener, CustomDialogFragmentListener {
-    private final int                          MAX_FREE_DOWNLOAD_ATTEMPTS  = 3,
-                                               IAP_RESULT_OK               = 0,
-                                               REQUEST_CODE_BUY_INTENT     = 1000;
+    private final int                          MAX_FREE_DOWNLOAD_ATTEMPTS        = 3,
+                                               NOKIA_IAP_RESULT_OK               = 0,
+                                               REQUEST_CODE_BUY_INTENT           = 1000;
     
-    private final String                       IAP_FULL_VERSION_PRODUCT_ID = "1258455",
-                                               IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
+    private final String                       NOKIA_IAP_FULL_VERSION_PRODUCT_ID = "1258455",
+                                               NOKIA_IAP_DEVELOPER_PAYLOAD       = "PXV0HzqSbr1ZTg0XoJX6a2hUZp6xFroR";
     
-    private boolean                            nokiaIAPSupported           = false,
-                                               isFullVersion               = false,
-                                               isOptionsMenuEnabled        = true;
-    private FrameLayout                        activityContentView         = null;
-    private View                               webCustomView               = null;
-    private FrameLayout                        webCustomViewContainer      = null;
-    private WebChromeClient.CustomViewCallback webCustomViewCallback       = null;
-    private WebChromeClient                    webChromeClient             = null;
-    private MetadataDownloader                 metadataDownloader          = null;
-    private INokiaIAPService                   nokiaIAPService             = null;
+    private boolean                            nokiaIAPSupported                 = false,
+                                               isFullVersion                     = false,
+                                               isOptionsMenuEnabled              = true;
+    private FrameLayout                        activityContentView               = null;
+    private View                               webCustomView                     = null;
+    private FrameLayout                        webCustomViewContainer            = null;
+    private WebChromeClient.CustomViewCallback webCustomViewCallback             = null;
+    private WebChromeClient                    webChromeClient                   = null;
+    private MetadataDownloader                 metadataDownloader                = null;
+    private INokiaIAPService                   nokiaIAPService                   = null;
     
     private ServiceConnection nokiaIAPServiceConnection = new ServiceConnection() {
         @Override
@@ -68,7 +68,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
             try {
                 int response = nokiaIAPService.isBillingSupported(3, getPackageName(), "inapp");
                 
-                if (response == IAP_RESULT_OK) {
+                if (response == NOKIA_IAP_RESULT_OK) {
                     nokiaIAPSupported = true;
                     
                     (new Thread(new Runnable() {
@@ -77,7 +77,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                             ArrayList<String> product_list   = new ArrayList<String>();
                             Bundle            query_products = new Bundle();
                             
-                            product_list.add(IAP_FULL_VERSION_PRODUCT_ID);
+                            product_list.add(NOKIA_IAP_FULL_VERSION_PRODUCT_ID);
                             
                             query_products.putStringArrayList("ITEM_ID_LIST", product_list);
                             
@@ -87,13 +87,13 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
                                 try {
                                     Bundle owned_items = nokiaIAPService.getPurchases(3, getPackageName(), "inapp", query_products, continuationToken);
                                     
-                                    if (owned_items.getInt("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
+                                    if (owned_items.getInt("RESPONSE_CODE", -1) == NOKIA_IAP_RESULT_OK) {
                                         ArrayList<String> owned_products = owned_items.getStringArrayList("INAPP_PURCHASE_ITEM_LIST");
                                         
                                         for (int i = 0; i < owned_products.size(); i++) {
                                             String product = owned_products.get(i);
                                             
-                                            if (product.equals(IAP_FULL_VERSION_PRODUCT_ID)) {
+                                            if (product.equals(NOKIA_IAP_FULL_VERSION_PRODUCT_ID)) {
                                                 isFullVersion = true;
 
                                                 SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
@@ -448,12 +448,12 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
         super.onActivityResult(requestCode, resultCode, data);
         
         if (requestCode == REQUEST_CODE_BUY_INTENT) {
-            if (data.getIntExtra("RESPONSE_CODE", -1) == IAP_RESULT_OK) {
+            if (data.getIntExtra("RESPONSE_CODE", -1) == NOKIA_IAP_RESULT_OK) {
                 try {
                     JSONObject object = new JSONObject(data.getStringExtra("INAPP_PURCHASE_DATA"));
                     
-                    if (object.getString("productId").equals(IAP_FULL_VERSION_PRODUCT_ID) &&
-                        object.getString("developerPayload").equals(IAP_DEVELOPER_PAYLOAD)) {
+                    if (object.getString("productId").equals(NOKIA_IAP_FULL_VERSION_PRODUCT_ID) &&
+                        object.getString("developerPayload").equals(NOKIA_IAP_DEVELOPER_PAYLOAD)) {
                         isFullVersion = true;
 
                         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
@@ -496,7 +496,7 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     public void onBuyFullVersionAgree() {
         if (nokiaIAPSupported) {
             try {
-                Bundle        intent_bundle  = nokiaIAPService.getBuyIntent(3, getPackageName(), IAP_FULL_VERSION_PRODUCT_ID, "inapp", IAP_DEVELOPER_PAYLOAD);
+                Bundle        intent_bundle  = nokiaIAPService.getBuyIntent(3, getPackageName(), NOKIA_IAP_FULL_VERSION_PRODUCT_ID, "inapp", NOKIA_IAP_DEVELOPER_PAYLOAD);
                 PendingIntent pending_intent = intent_bundle.getParcelable("BUY_INTENT");
                 
                 startIntentSenderForResult(pending_intent.getIntentSender(), REQUEST_CODE_BUY_INTENT, new Intent(), Integer.valueOf(0), Integer.valueOf(0), Integer.valueOf(0));
