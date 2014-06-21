@@ -231,18 +231,56 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
 
     @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        
-        if (savedInstanceState.getBoolean("YourTubeActivity.metadataDownloaderRunning", false)) {
-            if (metadataDownloader == null) {
-                String url = savedInstanceState.getString ("YourTubeActivity.metadataDownloaderURL", "");
-                
-                showMetadataProgressDialog();
+    public void onResume() {
+        super.onResume();
 
-                metadataDownloader = new MetadataDownloader(url, this);
-                metadataDownloader.execute(url);
+        WebView web_view = (WebView)findViewById(R.id.webview);
+
+        if (web_view != null) {
+            web_view.onResume();
+        } else if (activityContentView != null) {
+            web_view = (WebView)activityContentView.findViewById(R.id.webview);
+            
+            if (web_view != null) {
+                web_view.onResume();
             }
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        WebView web_view = (WebView)findViewById(R.id.webview);
+
+        if (web_view != null) {
+            web_view.onPause();
+        } else if (activityContentView != null) {
+            web_view = (WebView)activityContentView.findViewById(R.id.webview);
+            
+            if (web_view != null) {
+                web_view.onPause();
+            }
+        }
+        
+        if (webCustomView != null && webChromeClient != null) {
+            webChromeClient.onHideCustomView();
+        }
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        
+        if (metadataDownloader != null) {
+            metadataDownloader.setListener(null);
+            metadataDownloader.cancel(true);
+            
+            metadataDownloader = null;
+        }
+        
+        if (nokiaIAPService != null) {
+            unbindService(nokiaIAPServiceConnection);
         }
     }
     
@@ -280,56 +318,18 @@ public class YourTubeActivity extends Activity implements MetadataDownloaderList
     }
     
     @Override
-    public void onPause() {
-        super.onPause();
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        
+        if (savedInstanceState.getBoolean("YourTubeActivity.metadataDownloaderRunning", false)) {
+            if (metadataDownloader == null) {
+                String url = savedInstanceState.getString ("YourTubeActivity.metadataDownloaderURL", "");
+                
+                showMetadataProgressDialog();
 
-        WebView web_view = (WebView)findViewById(R.id.webview);
-
-        if (web_view != null) {
-            web_view.onPause();
-        } else if (activityContentView != null) {
-            web_view = (WebView)activityContentView.findViewById(R.id.webview);
-            
-            if (web_view != null) {
-                web_view.onPause();
+                metadataDownloader = new MetadataDownloader(url, this);
+                metadataDownloader.execute(url);
             }
-        }
-        
-        if (webCustomView != null && webChromeClient != null) {
-            webChromeClient.onHideCustomView();
-        }
-    }
-    
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        WebView web_view = (WebView)findViewById(R.id.webview);
-
-        if (web_view != null) {
-            web_view.onResume();
-        } else if (activityContentView != null) {
-            web_view = (WebView)activityContentView.findViewById(R.id.webview);
-            
-            if (web_view != null) {
-                web_view.onResume();
-            }
-        }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        
-        if (metadataDownloader != null) {
-            metadataDownloader.setListener(null);
-            metadataDownloader.cancel(true);
-            
-            metadataDownloader = null;
-        }
-        
-        if (nokiaIAPService != null) {
-            unbindService(nokiaIAPServiceConnection);
         }
     }
     
