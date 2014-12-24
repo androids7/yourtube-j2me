@@ -1,8 +1,6 @@
 import java.util.*;
 import javax.microedition.midlet.*;
 import javax.microedition.lcdui.*;
-import javax.microedition.media.*;
-import javax.microedition.media.control.*;
 
 public class YourTube extends MIDlet implements CommandListener {
     private static final int APP_STARTED   = 0;
@@ -65,7 +63,6 @@ public class YourTube extends MIDlet implements CommandListener {
     private ChoiceGroup SearchSearchResultsChoiceGroup = null,
                         DownloadVideoFormatChoiceGroup = null,
                         SettingsDstFSRootChoiceGroup = null;
-    private Player      PropertiesVideoPlayer = null;
 
     private void StartDownloadsListUpdate() {
         synchronized (this) {
@@ -618,11 +615,6 @@ public class YourTube extends MIDlet implements CommandListener {
                 }
             } else if (displayable.equals(PropertiesForm)) {
                 if (command == CMD_BACK) {
-                    if (PropertiesVideoPlayer != null && PropertiesVideoPlayer.getState() != Player.CLOSED) {
-                        PropertiesVideoPlayer.deallocate();
-                        PropertiesVideoPlayer.close();
-                    }
-
                     ShowSearchForm();
                 }
             } else if (displayable.equals(DownloadForm)) {
