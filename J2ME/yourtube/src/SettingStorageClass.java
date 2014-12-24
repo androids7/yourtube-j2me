@@ -6,11 +6,9 @@ public class SettingStorageClass extends Object {
 
     private static final int DESTINATION_DISK        = 1;
     private static final int VIDEO_FORMAT_ID         = 3;
-    private static final int PREVIEW_FORMAT          = 4;
     private static final int SHOW_SETTINGS_ON_LAUNCH = 5;
 
     private static final int     DEFAULT_VIDEO_FORMAT_ID         = 0;
-    private static final int     DEFAULT_PREVIEW_FORMAT          = 0;
     private static final boolean DEFAULT_SHOW_SETTINGS_ON_LAUNCH = true;
 
     private static Hashtable Hash = new Hashtable();
@@ -130,20 +128,6 @@ public class SettingStorageClass extends Object {
 
     public static synchronized void SetVideoFormatId(int value) throws Exception {
         Set(new SettingClass(VIDEO_FORMAT_ID, false, value, ""));
-    }
-
-    public static synchronized int GetPreviewFormat() {
-        SettingClass setting = Get(PREVIEW_FORMAT);
-
-        if (setting != null) {
-            return setting.GetIntValue();
-        } else {
-            return DEFAULT_PREVIEW_FORMAT;
-        }
-    }
-
-    public static synchronized void SetPreviewFormat(int value) throws Exception {
-        Set(new SettingClass(PREVIEW_FORMAT, false, value, ""));
     }
 
     public static synchronized boolean GetShowSettingsOnLaunch() {

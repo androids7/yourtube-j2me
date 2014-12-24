@@ -1,26 +1,17 @@
 public class VideoClass extends Object {
-    private int    Duration, ViewCount;
-    private String Title, Description, Author, VideoId, ThumbnailURL, PreviewURL;
+    private String VideoId, Title, Description, ThumbnailURL;
 
-    public VideoClass(int duration, int view_count, String title, String description, String author, String video_id, String thumbnail_url, String preview_url) {
+    public VideoClass(String video_id, String title, String description, String thumbnail_url) {
         super();
 
-        Duration     = duration;
-        ViewCount    = view_count;
+        VideoId      = video_id;
         Title        = title;
         Description  = description;
-        Author       = author;
-        VideoId      = video_id;
         ThumbnailURL = thumbnail_url;
-        PreviewURL   = preview_url;
     }
 
-    public int GetDuration() {
-        return Duration;
-    }
-
-    public int GetViewCount() {
-        return ViewCount;
+    public String GetVideoId() {
+        return VideoId;
     }
 
     public String GetTitle() {
@@ -31,23 +22,7 @@ public class VideoClass extends Object {
         return Description;
     }
 
-    public String GetAuthor() {
-        return Author;
-    }
-
-    public String GetVideoId() {
-        return VideoId;
-    }
-
     public String GetThumbnailURL() {
         return ThumbnailURL;
-    }
-
-    public String GetPreviewURL() {
-        return PreviewURL;
-    }
-
-    public String GetVisibleName() {
-        return Title + " (" + UtilClass.DurationToString(Duration) + ")";
     }
 }

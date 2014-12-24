@@ -1,16 +1,18 @@
 import java.io.*;
 import java.util.*;
 import javax.microedition.io.*;
-import com.alsutton.xmlparser.objectmodel.*;
+import org.json.me.*;
 
 public class APIClass extends Object {
     private static final int BUF_SIZE = 262144;
 
-    private static final String YOUTUBE_SEARCH_URL         = "http://gdata.youtube.com/feeds/api/videos";
-    private static final String YOUTUBE_SEARCH_SORT_ORDER  = "relevance";
-    private static final String YOUTUBE_SEARCH_START_INDEX = "1";
+    private static final String YOUTUBE_SEARCH_URL         = "https://www.googleapis.com/youtube/v3/search";
+    private static final String YOUTUBE_SEARCH_ORDER       = "relevance";
+    private static final String YOUTUBE_SEARCH_PART        = "snippet";
+    private static final String YOUTUBE_SEARCH_FIELDS      = "items(id%2Csnippet)";
+    private static final String YOUTUBE_SEARCH_TYPE        = "video";
     private static final String YOUTUBE_SEARCH_MAX_RESULTS = "25";
-    private static final String YOUTUBE_SEARCH_ALT         = "atom";
+    private static final String YOUTUBE_SEARCH_KEY         = "";
 
     private static final String YOUTUBE_VINFO_URL          = "http://www.youtube.com/get_video_info";
     private static final String YOUTUBE_VINFO_EL           = "detailpage";
@@ -20,6 +22,7 @@ public class APIClass extends Object {
     private static final String YOUTUBE_VINFO_HL           = "en";
 
     private static final String USER_AGENT = "YourTube";
+    private static final String REFERER    = "http://yourtube.sourceforge.net/yourtube/";
 
     private static Vector SearchResults = null;
 
@@ -28,6 +31,8 @@ public class APIClass extends Object {
     }
 
     public static void MakeSearch(String search_string) throws Exception {
+        int               chars_read;
+        StringBuffer      buffer;
         Vector            search_results = null;
         Exception         exception = null;
         HttpConnection    connection = null;
@@ -36,132 +41,72 @@ public class APIClass extends Object {
 
         try {
             connection = (HttpConnection)Connector.open(YOUTUBE_SEARCH_URL +
-                                                        "?vq="             + UtilClass.URLEncode(search_string) +
-                                                        "&orderby="        + YOUTUBE_SEARCH_SORT_ORDER +
-                                                        "&start-index="    + YOUTUBE_SEARCH_START_INDEX +
-                                                        "&max-results="    + YOUTUBE_SEARCH_MAX_RESULTS +
-                                                        "&alt="            + YOUTUBE_SEARCH_ALT);
+                                                        "?q="              + UtilClass.URLEncode(search_string) +
+                                                        "&order="          + YOUTUBE_SEARCH_ORDER +
+                                                        "&part="           + YOUTUBE_SEARCH_PART +
+                                                        "&fields="         + YOUTUBE_SEARCH_FIELDS +
+                                                        "&type="           + YOUTUBE_SEARCH_TYPE +
+                                                        "&maxResults="     + YOUTUBE_SEARCH_MAX_RESULTS +
+                                                        "&key="            + YOUTUBE_SEARCH_KEY);
 
             connection.setRequestMethod(HttpConnection.GET);
             connection.setRequestProperty("User-Agent", USER_AGENT);
+            connection.setRequestProperty("Referer", REFERER);
 
             stream        = connection.openDataInputStream();
             stream_reader = new InputStreamReader(stream, "utf-8");
+            buffer        = new StringBuffer();
 
-            TreeBuilder builder = new TreeBuilder();
-            Node        root    = builder.createTree(stream_reader);
+            char buf[] = new char[BUF_SIZE];
+
+            while ((chars_read = stream_reader.read(buf, 0, BUF_SIZE)) != -1) {
+                buffer.append(buf, 0, chars_read);
+            }
+
+            JSONObject root_object = new JSONObject(buffer.toString());
+            JSONArray  root_items  = root_object.getJSONArray("items");
 
             search_results = new Vector();
 
-            if (root.getName().equals("feed")) {
-                for (int i = 0; i < root.children.size(); i++) {
-                    Node entry = (Node)root.children.elementAt(i);
+            for (int i = 0; i < root_items.length(); i++) {
+                if (!root_items.isNull(i)) {
+                    String video_id          = "";
+                    String video_title       = "";
+                    String video_description = "";
+                    String thumbnail_url     = "";
 
-                    if (entry.getName().equals("entry")) {
-                        int    max_thumbnail_width = 0;
-                        int    best_preview_format = 0;
-                        int    video_duration      = 0;
-                        int    view_count          = 0;
-                        String video_title         = "";
-                        String video_description   = "";
-                        String video_author        = "";
-                        String video_id            = "";
-                        String thumbnail_url       = "";
-                        String preview_url         = "";
-
-                        for (int j = 0; j < entry.children.size(); j++) {
-                            Node item = (Node)entry.children.elementAt(j);
-
-                            if (item.getName().equals("title")) {
-                                if (item.attributes.get("type") != null && item.attributes.get("type").equals("text")) {
-                                    video_title = item.getText();
-                                }
-                            } else if (item.getName().equals("content")) {
-                                if (item.attributes.get("type") != null && item.attributes.get("type").equals("text")) {
-                                    video_description = item.getText();
-                                }
-                            } else if (item.getName().equals("author")) {
-                                for (int k = 0; k < item.children.size(); k++) {
-                                    Node author_item = (Node)item.children.elementAt(k);
-
-                                    if (author_item.getName().equals("name")) {
-                                        video_author = author_item.getText();
-                                    }
-                                }
-                            } else if (item.getName().equals("media:group")) {
-                                for (int k = 0; k < item.children.size(); k++) {
-                                    Node media_item = (Node)item.children.elementAt(k);
-
-                                    if (media_item.getName().equals("media:player") && media_item.attributes.get("url") != null) {
-                                        String video_url = (String)media_item.attributes.get("url");
-
-                                        int begin = video_url.indexOf("?v=");
-
-                                        if (begin == -1) {
-                                            begin = video_url.indexOf("&v=");
-                                        }
-
-                                        if (begin != -1) {
-                                            int end = video_url.indexOf("&", begin + 3);
-
-                                            if (end == -1) {
-                                                end = video_url.length();
-                                            }
-
-                                            video_id = UtilClass.URLDecode(video_url.substring(begin + 3, end));
-                                        }
-                                    } else if (media_item.getName().equals("media:thumbnail") && media_item.attributes.get("url") != null) {
-                                        if (media_item.attributes.get("width") != null) {
-                                            try {
-                                                int width = Integer.parseInt((String)media_item.attributes.get("width"));
-
-                                                if (width > max_thumbnail_width) {
-                                                    max_thumbnail_width = width;
-                                                    thumbnail_url       = (String)media_item.attributes.get("url");
-                                                }
-                                            } catch (Exception ex) {
-                                                // Ignore
-                                            }
-                                        }
-                                    } else if (media_item.getName().equals("media:content") && media_item.attributes.get("url") != null &&
-                                               media_item.attributes.get("type") != null && media_item.attributes.get("type").equals("video/3gpp")) {
-                                        if (media_item.attributes.get("yt:format") != null) {
-                                            try {
-                                                int format = Integer.parseInt((String)media_item.attributes.get("yt:format"));
-
-                                                if (format > best_preview_format) {
-                                                    best_preview_format = format;
-                                                    preview_url         = (String)media_item.attributes.get("url");
-                                                }
-                                            } catch (Exception ex) {
-                                                // Ignore
-                                            }
-                                        }
-                                    } else if (media_item.getName().equals("yt:duration") && media_item.attributes.get("seconds") != null) {
-                                        try {
-                                            video_duration = Integer.parseInt((String)media_item.attributes.get("seconds"));
-                                        } catch (Exception ex) {
-                                            // Ignore
-                                        }
-                                    }
-                                }
-                            } else if (item.getName().equals("yt:statistics") && item.attributes.get("viewCount") != null) {
-                                try {
-                                    view_count = Integer.parseInt((String)item.attributes.get("viewCount"));
-                                } catch (Exception ex) {
-                                    // Ignore
-                                }
-                            }
-                        }
-
-                        if (video_duration != 0 && !video_title.equals("") && !video_description.equals("") && !video_author.equals("") &&
-                                                   !video_id.equals("")    && !thumbnail_url.equals("")     && !preview_url.equals("")) {
-                            search_results.addElement(new VideoClass(video_duration, view_count, video_title, video_description, video_author, video_id, thumbnail_url, preview_url));
+                    JSONObject item_object = root_items.getJSONObject(i);
+                    
+                    if (item_object.optJSONObject("id") != null) {
+                        JSONObject id_object = item_object.getJSONObject("id");
+                        
+                        if (id_object.optString("kind", "").equals("youtube#video")) {
+                            video_id = id_object.optString("videoId", "");
                         }
                     }
+                    
+                    if (item_object.optJSONObject("snippet") != null) {
+                        JSONObject snippet_object = item_object.getJSONObject("snippet");
+                        
+                        video_title       = snippet_object.optString("title", "");
+                        video_description = snippet_object.optString("description", "");
+                        
+                        if (snippet_object.optJSONObject("thumbnails") != null) {
+                            JSONObject thumbnails_object = snippet_object.getJSONObject("thumbnails");
+                            
+                            if (thumbnails_object.optJSONObject("medium") != null) {
+                                thumbnail_url = thumbnails_object.getJSONObject("medium").optString("url", "");
+                            } else if (thumbnails_object.optJSONObject("default") != null) {
+                                thumbnail_url = thumbnails_object.getJSONObject("default").optString("url", "");
+                            }
+                        }
+                    }
+
+                    if (!video_title.equals("") && !video_description.equals("") &&
+                        !video_id.equals("")    && !thumbnail_url.equals("")) {
+                        search_results.addElement(new VideoClass(video_id, video_title, video_description, thumbnail_url));
+                    }
                 }
-            } else {
-                throw (new Exception("Invalid XML data"));
             }
         } catch (Exception ex) {
             exception = ex;
@@ -197,8 +142,8 @@ public class APIClass extends Object {
 
     public static Vector GetAvailableFormats(String video_id) {
         int                   chars_read;
-        Vector                result;
         StringBuffer          buffer;
+        Vector                result = null;
         HttpConnection        connection = null;
         InputStream           stream = null;
         InputStreamReader     stream_reader = null;

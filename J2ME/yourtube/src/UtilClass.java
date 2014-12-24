@@ -75,37 +75,6 @@ public class UtilClass extends Object {
         return buf.toString();
     }
 
-    public static boolean URLEncodedOk(String str) {
-        for (int i = 0; i < str.length(); i++) {
-            if (URL_ENCODEDOK.indexOf(str.charAt(i)) == -1) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    
-    public static String DurationToString(int duration) {
-        int d =  duration / 86400;
-        int h = (duration % 86400) / 3600;
-        int m = (duration % 3600)  / 60;
-        int s =  duration % 60;
-
-        if (d == 0) {
-            return ZeroPad(h) + ":" + ZeroPad(m) + ":" + ZeroPad(s);
-        } else {
-            return String.valueOf(d) + "d " + ZeroPad(h) + ":" + ZeroPad(m) + ":" + ZeroPad(s);
-        }
-    }
-
-    public static String ZeroPad(int num) {
-        if (num < 10) {
-            return new String("0") + String.valueOf(num);
-        } else {
-            return                   String.valueOf(num);
-        }
-    }
-
     public static String MakeValidFilename(String string) {
         String file_name = new String(string);
 

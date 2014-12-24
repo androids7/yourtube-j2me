@@ -31,10 +31,6 @@ public class YourTube extends MIDlet implements CommandListener {
     private static final String VIDEO_FORMAT_EXTENSIONS[] = {"mp4",                 "mp4",              "flv",              "flv",              "flv",              "3gp",               "3gp"};
     private static final int    VIDEO_FORMAT_IDS[]        = {22,                    18,                 35,                 34,                 5,                  36,                  17};
 
-    private static final String PREVIEW_FORMATS[]         = {"Video", "Thumbnail"};
-    private static final int    PREVIEW_FORMAT_VIDEO      = 0;
-    private static final int    PREVIEW_FORMAT_THUMBNAIL  = 1;
-
     private static final int SLEEP_DELAY              = 1000;
     private static final int MAX_FNAME_DUPCHECK_TRIES = 100;
 
@@ -68,7 +64,6 @@ public class YourTube extends MIDlet implements CommandListener {
                         DownloadFileNameTextField = null;
     private ChoiceGroup SearchSearchResultsChoiceGroup = null,
                         DownloadVideoFormatChoiceGroup = null,
-                        SettingsPreviewFormatChoiceGroup = null,
                         SettingsDstFSRootChoiceGroup = null;
     private Player      PropertiesVideoPlayer = null;
 
@@ -219,7 +214,7 @@ public class YourTube extends MIDlet implements CommandListener {
             youtube_video_names = new String[youtube_videos.size()];
 
             for (int i = 0; i < youtube_videos.size(); i++) {
-                youtube_video_names[i] = ((VideoClass)youtube_videos.elementAt(i)).GetVisibleName();
+                youtube_video_names[i] = ((VideoClass)youtube_videos.elementAt(i)).GetTitle();
             }
         } else {
             youtube_video_names = new String[0];
@@ -249,22 +244,11 @@ public class YourTube extends MIDlet implements CommandListener {
         Display.getDisplay(this).setCurrent(SearchForm);
     }
 
-    private void AppendVideoPlayerToPropertiesForm(VideoClass youtube_video) throws Exception {
-        PropertiesVideoPlayer = Manager.createPlayer(youtube_video.GetPreviewURL());
-        PropertiesVideoPlayer.realize();
+    private void ShowPropertiesForm(VideoClass youtube_video, Image video_thumbnail) {
+        int        image_width;
+        StringItem str_item;
 
-        VideoControl control = (VideoControl)PropertiesVideoPlayer.getControl("VideoControl");
-        Item         video   = (Item)control.initDisplayMode(VideoControl.USE_GUI_PRIMITIVE, null);
-
-        video.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
-
-        PropertiesForm.append(video);
-
-        PropertiesVideoPlayer.start();
-    }
-
-    private void AppendThumbnailToPropertiesForm(Image video_thumbnail) {
-        int image_width;
+        PropertiesForm = new Form("YouTube Video Properties");
 
         if (PropertiesForm.getWidth() < PropertiesForm.getHeight()) {
             image_width = PropertiesForm.getWidth()  - 10;
@@ -281,39 +265,9 @@ public class YourTube extends MIDlet implements CommandListener {
                 PropertiesForm.append(thumbnail);
             }
         }
-    }
 
-    private void ShowPropertiesForm(VideoClass youtube_video, Image video_thumbnail) {
-        StringItem str_item;
-
-        PropertiesForm = new Form("YouTube Video Properties");
-
-        if (SettingStorageClass.GetPreviewFormat() == PREVIEW_FORMAT_VIDEO) {
-            try {
-                AppendVideoPlayerToPropertiesForm(youtube_video);
-            } catch (Exception ex) {
-                PropertiesForm.deleteAll();
-
-                AppendThumbnailToPropertiesForm(video_thumbnail);
-            }
-        } else {
-            AppendThumbnailToPropertiesForm(video_thumbnail);
-        }
-
-        str_item = new StringItem("", youtube_video.GetVisibleName());
+        str_item = new StringItem("", youtube_video.GetTitle());
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_MEDIUM));
-        str_item.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
-
-        PropertiesForm.append(str_item);
-
-        str_item = new StringItem("", " ");
-        str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
-        str_item.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
-
-        PropertiesForm.append(str_item);
-
-        str_item = new StringItem("", "By " + youtube_video.GetAuthor() + ", " + String.valueOf(youtube_video.GetViewCount()) + " views");
-        str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_ITALIC, Font.SIZE_SMALL));
         str_item.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 
         PropertiesForm.append(str_item);
@@ -326,7 +280,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
         str_item = new StringItem("", youtube_video.GetDescription());
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
-        str_item.setLayout(Item.LAYOUT_LEFT);
+        str_item.setLayout(Item.LAYOUT_CENTER);
 
         PropertiesForm.append(str_item);
 
@@ -467,16 +421,9 @@ public class YourTube extends MIDlet implements CommandListener {
     }
 
     private void ShowSettingsForm() {
-        int    selected_format = 0,
-               selected_disk   = 0;
+        int    selected_disk = 0;
         String root_names[];
         Vector roots;
-
-        if (SettingStorageClass.GetPreviewFormat() == PREVIEW_FORMAT_VIDEO) {
-            selected_format = PREVIEW_FORMAT_VIDEO;
-        } else if (SettingStorageClass.GetPreviewFormat() == PREVIEW_FORMAT_THUMBNAIL) {
-            selected_format = PREVIEW_FORMAT_THUMBNAIL;
-        }
 
         roots = UtilClass.GetFileSystemRoots();
 
@@ -490,17 +437,13 @@ public class YourTube extends MIDlet implements CommandListener {
             }
         }
 
-        SettingsPreviewFormatChoiceGroup = new ChoiceGroup("Preferred Preview Format", ChoiceGroup.POPUP, PREVIEW_FORMATS, null);
-        SettingsDstFSRootChoiceGroup     = new ChoiceGroup("Destination Disk", ChoiceGroup.POPUP, root_names, null);
-
-        SettingsPreviewFormatChoiceGroup.setSelectedIndex(selected_format, true);
+        SettingsDstFSRootChoiceGroup = new ChoiceGroup("Destination Disk", ChoiceGroup.POPUP, root_names, null);
 
         if (SettingsDstFSRootChoiceGroup.size() != 0) {
             SettingsDstFSRootChoiceGroup.setSelectedIndex(selected_disk, true);
         }
 
         SettingsForm = new Form("Settings");
-        SettingsForm.append(SettingsPreviewFormatChoiceGroup);
         SettingsForm.append(SettingsDstFSRootChoiceGroup);
         SettingsForm.addCommand(CMD_OK);
         SettingsForm.addCommand(CMD_BACK);
@@ -754,21 +697,16 @@ public class YourTube extends MIDlet implements CommandListener {
                 }
             } else if (displayable.equals(SettingsForm)) {
                 if (command == CMD_OK) {
-                    if (SettingsPreviewFormatChoiceGroup.getSelectedIndex() != -1) {
-                        if (SettingsDstFSRootChoiceGroup.getSelectedIndex() != -1) {
-                            try {
-                                SettingStorageClass.SetPreviewFormat(SettingsPreviewFormatChoiceGroup.getSelectedIndex());
-                                SettingStorageClass.SetDestinationDisk(SettingsDstFSRootChoiceGroup.getString(SettingsDstFSRootChoiceGroup.getSelectedIndex()));
+                    if (SettingsDstFSRootChoiceGroup.getSelectedIndex() != -1) {
+                        try {
+                            SettingStorageClass.SetDestinationDisk(SettingsDstFSRootChoiceGroup.getString(SettingsDstFSRootChoiceGroup.getSelectedIndex()));
 
-                                ShowSearchForm();
-                            } catch (Exception ex) {
-                                ShowErrorMessage(ex.toString());
-                            }
-                        } else {
-                            ShowErrorMessage("No disk selected");
+                            ShowSearchForm();
+                        } catch (Exception ex) {
+                            ShowErrorMessage(ex.toString());
                         }
                     } else {
-                        ShowErrorMessage("No preferred preview format selected");
+                        ShowErrorMessage("No disk selected");
                     }
                 } else if (command == CMD_BACK) {
                     ShowSearchForm();
