@@ -8,7 +8,6 @@ public class UtilClass extends Object {
     private static final String HEXSTR         = "0123456789ABCDEF";
     private static final char   HEX[]          = "0123456789ABCDEF".toCharArray();
     private static final String URL_UNRESERVED = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~";
-    private static final String URL_ENCODEDOK  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.~%";
 
     private static final String USER_AGENT = "YourTube";
 
