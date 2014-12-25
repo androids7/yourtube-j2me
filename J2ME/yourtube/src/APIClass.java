@@ -6,13 +6,15 @@ import org.json.me.*;
 public class APIClass extends Object {
     private static final int BUF_SIZE = 262144;
 
+    private static final String YOUTUBE_API_REFERER        = "http://yourtube.sourceforge.net/yourtube/";
+    private static final String YOUTUBE_API_KEY            = "";
+
     private static final String YOUTUBE_SEARCH_URL         = "https://www.googleapis.com/youtube/v3/search";
     private static final String YOUTUBE_SEARCH_ORDER       = "relevance";
     private static final String YOUTUBE_SEARCH_PART        = "snippet";
     private static final String YOUTUBE_SEARCH_FIELDS      = "items(id%2Csnippet)";
     private static final String YOUTUBE_SEARCH_TYPE        = "video";
     private static final String YOUTUBE_SEARCH_MAX_RESULTS = "25";
-    private static final String YOUTUBE_SEARCH_KEY         = "";
 
     private static final String YOUTUBE_VINFO_URL          = "http://www.youtube.com/get_video_info";
     private static final String YOUTUBE_VINFO_EL           = "detailpage";
@@ -22,7 +24,6 @@ public class APIClass extends Object {
     private static final String YOUTUBE_VINFO_HL           = "en";
 
     private static final String USER_AGENT = "YourTube";
-    private static final String REFERER    = "http://yourtube.sourceforge.net/yourtube/";
 
     private static Vector SearchResults = null;
 
@@ -47,11 +48,11 @@ public class APIClass extends Object {
                                                         "&fields="         + YOUTUBE_SEARCH_FIELDS +
                                                         "&type="           + YOUTUBE_SEARCH_TYPE +
                                                         "&maxResults="     + YOUTUBE_SEARCH_MAX_RESULTS +
-                                                        "&key="            + YOUTUBE_SEARCH_KEY);
+                                                        "&key="            + YOUTUBE_API_KEY);
 
             connection.setRequestMethod(HttpConnection.GET);
+            connection.setRequestProperty("Referer", YOUTUBE_API_REFERER);
             connection.setRequestProperty("User-Agent", USER_AGENT);
-            connection.setRequestProperty("Referer", REFERER);
 
             stream        = connection.openDataInputStream();
             stream_reader = new InputStreamReader(stream, "utf-8");
