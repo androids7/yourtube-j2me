@@ -154,9 +154,6 @@ public class YourTube extends MIDlet implements CommandListener {
     }
 
     private void ShowAboutForm() {
-        Spacer     spacer;
-        StringItem str_item;
-
         String version = getAppProperty("MIDlet-Version");
         String vendor  = getAppProperty("MIDlet-Vendor");
         String url     = getAppProperty("MIDlet-Info-URL");
@@ -182,12 +179,12 @@ public class YourTube extends MIDlet implements CommandListener {
             // Ignore
         }
 
-        spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        Spacer spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
         spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 
         AboutForm.append(spacer);
 
-        str_item = new StringItem("", "YourTube Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
+        StringItem str_item = new StringItem("", "YourTube Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER);
 
@@ -200,9 +197,6 @@ public class YourTube extends MIDlet implements CommandListener {
     }
 
     private void ShowHelpForm() {
-        Spacer     spacer;
-        StringItem str_item;
-
         String url = getAppProperty("MIDlet-Info-URL");
 
         if (url == null) {
@@ -211,14 +205,14 @@ public class YourTube extends MIDlet implements CommandListener {
 
         HelpForm = new Form("Help");
 
-        spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        Spacer spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
         spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 
         HelpForm.append(spacer);
 
-        str_item = new StringItem("", "YourTube is an open source J2ME YouTube video downloader for mobile phones." + "\n\n" +
-                                      "If you have any questions regarding this application, you can contact application developer on this website:" + "\n\n" +
-                                      url);
+        StringItem str_item = new StringItem("", "YourTube is an open source J2ME YouTube video downloader for mobile phones." + "\n\n" +
+                                                 "If you have any questions regarding this application, you can contact application developer on this website:" + "\n\n" +
+                                                 url);
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER);
 
@@ -443,7 +437,18 @@ public class YourTube extends MIDlet implements CommandListener {
 
     private void ShowDeleteDownloadForm(String header, String text) {
         DeleteDownloadForm = new Form(header);
-        DeleteDownloadForm.append(text);
+
+        Spacer spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
+
+        DeleteDownloadForm.append(spacer);
+
+        StringItem str_item = new StringItem("", text);
+        str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
+        str_item.setLayout(Item.LAYOUT_CENTER);
+
+        DeleteDownloadForm.append(str_item);
+
         DeleteDownloadForm.addCommand(CMD_OK);
         DeleteDownloadForm.addCommand(CMD_BACK);
         DeleteDownloadForm.setCommandListener(this);
