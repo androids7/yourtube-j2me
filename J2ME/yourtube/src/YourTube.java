@@ -154,6 +154,9 @@ public class YourTube extends MIDlet implements CommandListener {
     }
 
     private void ShowAboutForm() {
+        Spacer     spacer;
+        StringItem str_item;
+
         String version = getAppProperty("MIDlet-Version");
         String vendor  = getAppProperty("MIDlet-Vendor");
         String url     = getAppProperty("MIDlet-Info-URL");
@@ -169,6 +172,7 @@ public class YourTube extends MIDlet implements CommandListener {
         }
 
         AboutForm = new Form("About");
+
         try {
             ImageItem icon = new ImageItem(null, Image.createImage(APP_ABOUT_ICON),
                                            Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER, null);
@@ -177,7 +181,18 @@ public class YourTube extends MIDlet implements CommandListener {
         } catch (Exception ex) {
             // Ignore
         }
-        AboutForm.append("\n" + "YourTube Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
+
+        spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
+
+        AboutForm.append(spacer);
+
+        str_item = new StringItem("", "YourTube Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
+        str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
+        str_item.setLayout(Item.LAYOUT_CENTER);
+
+        AboutForm.append(str_item);
+
         AboutForm.addCommand(CMD_BACK);
         AboutForm.setCommandListener(this);
 
@@ -185,6 +200,9 @@ public class YourTube extends MIDlet implements CommandListener {
     }
 
     private void ShowHelpForm() {
+        Spacer     spacer;
+        StringItem str_item;
+
         String url = getAppProperty("MIDlet-Info-URL");
 
         if (url == null) {
@@ -192,9 +210,20 @@ public class YourTube extends MIDlet implements CommandListener {
         }
 
         HelpForm = new Form("Help");
-        HelpForm.append("YourTube is an open source J2ME YouTube video downloader for mobile phones." + "\n\n" +
-                        "If you have any questions regarding this application, you can contact application developer on this website:" + "\n\n" +
-                        url);
+
+        spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
+
+        HelpForm.append(spacer);
+
+        str_item = new StringItem("", "YourTube is an open source J2ME YouTube video downloader for mobile phones." + "\n\n" +
+                                      "If you have any questions regarding this application, you can contact application developer on this website:" + "\n\n" +
+                                      url);
+        str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
+        str_item.setLayout(Item.LAYOUT_CENTER);
+
+        HelpForm.append(str_item);
+
         HelpForm.addCommand(CMD_BACK);
         HelpForm.setCommandListener(this);
 
@@ -243,6 +272,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
     private void ShowPropertiesForm(VideoClass youtube_video, Image video_thumbnail) {
         int        image_width;
+        Spacer     spacer;
         StringItem str_item;
 
         PropertiesForm = new Form("YouTube Video Properties");
@@ -263,17 +293,21 @@ public class YourTube extends MIDlet implements CommandListener {
             }
         }
 
+        spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
+
+        PropertiesForm.append(spacer);
+
         str_item = new StringItem("", youtube_video.GetTitle());
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 
         PropertiesForm.append(str_item);
 
-        str_item = new StringItem("", " ");
-        str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
-        str_item.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
+        spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
+        spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 
-        PropertiesForm.append(str_item);
+        PropertiesForm.append(spacer);
 
         str_item = new StringItem("", youtube_video.GetDescription());
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
