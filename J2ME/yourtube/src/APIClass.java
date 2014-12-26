@@ -6,8 +6,17 @@ import org.json.me.*;
 public class APIClass extends Object {
     private static final int BUF_SIZE = 262144;
 
-    private static final String YOUTUBE_API_REFERER        = "http://yourtube.sourceforge.net/yourtube/";
-    private static final String YOUTUBE_API_KEY            = "";
+    private static final String YOUTUBE_API_REFERER_1      = "yourtube.sourceforge.net/api_1/api";
+    private static final String YOUTUBE_API_KEY_1          = "";
+
+    private static final String YOUTUBE_API_REFERER_2      = "yourtube.sourceforge.net/api_2/api";
+    private static final String YOUTUBE_API_KEY_2          = "";
+
+    private static final String YOUTUBE_API_REFERER_3      = "yourtube.sourceforge.net/api_3/api";
+    private static final String YOUTUBE_API_KEY_3          = "";
+
+    private static final String YOUTUBE_API_REFERER_4      = "yourtube.sourceforge.net/api_4/api";
+    private static final String YOUTUBE_API_KEY_4          = "";
 
     private static final String YOUTUBE_SEARCH_URL         = "https://www.googleapis.com/youtube/v3/search";
     private static final String YOUTUBE_SEARCH_ORDER       = "relevance";
@@ -33,6 +42,7 @@ public class APIClass extends Object {
 
     public static void MakeSearch(String search_string) throws Exception {
         int               chars_read;
+        String            youtube_api_referer, youtube_api_key;
         StringBuffer      buffer;
         Vector            search_results = null;
         Exception         exception = null;
@@ -41,6 +51,22 @@ public class APIClass extends Object {
         InputStreamReader stream_reader = null;
 
         try {
+            double random = new Random().nextDouble();
+
+            if (random > 0.75) {
+                youtube_api_referer = YOUTUBE_API_REFERER_1;
+                youtube_api_key     = YOUTUBE_API_KEY_1;
+            } else if (random > 0.5) {
+                youtube_api_referer = YOUTUBE_API_REFERER_2;
+                youtube_api_key     = YOUTUBE_API_KEY_2;
+            } else if (random > 0.25) {
+                youtube_api_referer = YOUTUBE_API_REFERER_3;
+                youtube_api_key     = YOUTUBE_API_KEY_3;
+            } else {
+                youtube_api_referer = YOUTUBE_API_REFERER_4;
+                youtube_api_key     = YOUTUBE_API_KEY_4;
+            }
+
             connection = (HttpConnection)Connector.open(YOUTUBE_SEARCH_URL +
                                                         "?q="              + UtilClass.URLEncode(search_string) +
                                                         "&order="          + YOUTUBE_SEARCH_ORDER +
@@ -48,10 +74,10 @@ public class APIClass extends Object {
                                                         "&fields="         + YOUTUBE_SEARCH_FIELDS +
                                                         "&type="           + YOUTUBE_SEARCH_TYPE +
                                                         "&maxResults="     + YOUTUBE_SEARCH_MAX_RESULTS +
-                                                        "&key="            + YOUTUBE_API_KEY);
+                                                        "&key="            + youtube_api_key);
 
             connection.setRequestMethod(HttpConnection.GET);
-            connection.setRequestProperty("Referer", YOUTUBE_API_REFERER);
+            connection.setRequestProperty("Referer", youtube_api_referer);
             connection.setRequestProperty("User-Agent", USER_AGENT);
 
             stream        = connection.openDataInputStream();
