@@ -234,7 +234,7 @@ public class YourTube extends MIDlet implements CommandListener {
             youtube_video_names = new String[youtube_videos.size()];
 
             for (int i = 0; i < youtube_videos.size(); i++) {
-                youtube_video_names[i] = ((VideoClass)youtube_videos.elementAt(i)).GetTitle();
+                youtube_video_names[i] = ((VideoClass)youtube_videos.elementAt(i)).GetVisibleName();
             }
         } else {
             youtube_video_names = new String[0];
@@ -292,7 +292,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
         PropertiesForm.append(spacer);
 
-        str_item = new StringItem("", youtube_video.GetTitle());
+        str_item = new StringItem("", youtube_video.GetVisibleName());
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_BOLD, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 

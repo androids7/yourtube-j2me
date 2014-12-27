@@ -23,7 +23,11 @@ public class APIClass extends Object {
     private static final String YOUTUBE_SEARCH_PART        = "snippet";
     private static final String YOUTUBE_SEARCH_FIELDS      = "items(id%2Csnippet)";
     private static final String YOUTUBE_SEARCH_TYPE        = "video";
+    private static final String YOUTUBE_SEARCH_SYNDICATED  = "true";
     private static final String YOUTUBE_SEARCH_MAX_RESULTS = "25";
+
+    private static final String YOUTUBE_LIST_URL           = "https://www.googleapis.com/youtube/v3/videos";
+    private static final String YOUTUBE_LIST_PART          = "id%2CcontentDetails";
 
     private static final String YOUTUBE_VINFO_URL          = "http://www.youtube.com/get_video_info";
     private static final String YOUTUBE_VINFO_EL           = "detailpage";
@@ -67,14 +71,15 @@ public class APIClass extends Object {
                 youtube_api_key     = YOUTUBE_API_KEY_4;
             }
 
-            connection = (HttpConnection)Connector.open(YOUTUBE_SEARCH_URL +
-                                                        "?q="              + UtilClass.URLEncode(search_string) +
-                                                        "&order="          + YOUTUBE_SEARCH_ORDER +
-                                                        "&part="           + YOUTUBE_SEARCH_PART +
-                                                        "&fields="         + YOUTUBE_SEARCH_FIELDS +
-                                                        "&type="           + YOUTUBE_SEARCH_TYPE +
-                                                        "&maxResults="     + YOUTUBE_SEARCH_MAX_RESULTS +
-                                                        "&key="            + youtube_api_key);
+            connection = (HttpConnection)Connector.open(YOUTUBE_SEARCH_URL  +
+                                                        "?q="               + UtilClass.URLEncode(search_string) +
+                                                        "&order="           + YOUTUBE_SEARCH_ORDER +
+                                                        "&part="            + YOUTUBE_SEARCH_PART +
+                                                        "&fields="          + YOUTUBE_SEARCH_FIELDS +
+                                                        "&type="            + YOUTUBE_SEARCH_TYPE +
+                                                        "&videoSyndicated=" + YOUTUBE_SEARCH_SYNDICATED +
+                                                        "&maxResults="      + YOUTUBE_SEARCH_MAX_RESULTS +
+                                                        "&key="             + youtube_api_key);
 
             connection.setRequestMethod(HttpConnection.GET);
             connection.setRequestProperty("Referer", youtube_api_referer);
@@ -129,9 +134,74 @@ public class APIClass extends Object {
                         }
                     }
 
-                    if (!video_title.equals("") && !video_description.equals("") &&
-                        !video_id.equals("")    && !thumbnail_url.equals("")) {
+                    if (!video_id.equals("")          && !video_title.equals("") &&
+                        !video_description.equals("") && !thumbnail_url.equals("")) {
                         search_results.addElement(new VideoClass(video_id, video_title, video_description, thumbnail_url));
+                    }
+                }
+            }
+
+            stream_reader.close();
+            stream.close();
+            connection.close();
+            
+            if (search_results.size() != 0) {
+                String video_ids = "";
+
+                for (int i = 0; i < search_results.size(); i++) {
+                    if (video_ids.equals("")) {
+                        video_ids = ((VideoClass)search_results.elementAt(i)).GetVideoId();
+                    } else {
+                        video_ids = video_ids + "," + ((VideoClass)search_results.elementAt(i)).GetVideoId();
+                    }
+                }
+
+                connection = (HttpConnection)Connector.open(YOUTUBE_LIST_URL +
+                                                            "?id="           + UtilClass.URLEncode(video_ids) +
+                                                            "&part="         + YOUTUBE_LIST_PART +
+                                                            "&key="          + youtube_api_key);
+
+                connection.setRequestMethod(HttpConnection.GET);
+                connection.setRequestProperty("Referer", youtube_api_referer);
+                connection.setRequestProperty("User-Agent", USER_AGENT);
+
+                stream        = connection.openDataInputStream();
+                stream_reader = new InputStreamReader(stream, "utf-8");
+                buffer        = new StringBuffer();
+
+                buf = new char[BUF_SIZE];
+
+                while ((chars_read = stream_reader.read(buf, 0, BUF_SIZE)) != -1) {
+                    buffer.append(buf, 0, chars_read);
+                }
+
+                root_object = new JSONObject(buffer.toString());
+                root_items  = root_object.getJSONArray("items");
+
+                for (int i = 0; i < root_items.length(); i++) {
+                    if (!root_items.isNull(i)) {
+                        String video_id       = "";
+                        String video_duration = "";
+
+                        JSONObject item_object = root_items.getJSONObject(i);
+
+                        if (item_object.optString("kind", "").equals("youtube#video")) {
+                            video_id = item_object.optString("id", "");
+
+                            if (item_object.optJSONObject("contentDetails") != null) {
+                                JSONObject details_object = item_object.getJSONObject("contentDetails");
+
+                                video_duration = details_object.optString("duration", "");
+                            }
+                        }
+
+                        if (!video_id.equals("") && !video_duration.equals("")) {
+                            for (int j = 0; j < search_results.size(); j++) {
+                                if (((VideoClass)search_results.elementAt(j)).GetVideoId().equals(video_id)) {
+                                    ((VideoClass)search_results.elementAt(j)).SetDuration(video_duration);
+                                }
+                            }
+                        }
                     }
                 }
             }

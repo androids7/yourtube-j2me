@@ -74,6 +74,126 @@ public class UtilClass extends Object {
         return buf.toString();
     }
 
+    public static String DurationToString(String duration) {
+        final String NUM_CHARS = "0123456789";
+
+        boolean parsing_time   = false,
+                ignore_digits  = false;
+        int     years          = 0,
+                months         = 0,
+                weeks          = 0,
+                days           = 0,
+                hours          = 0,
+                mins           = 0,
+                secs           = 0;
+        String  result         = "",
+                current_number = "";
+
+        for (int i = 0; i < duration.length(); i++) {
+            if (duration.charAt(i) == '.' || duration.charAt(i) == ',') {
+                ignore_digits = true;
+            } else if (NUM_CHARS.indexOf(duration.charAt(i)) != -1) {
+                if (!ignore_digits) {
+                    current_number += duration.charAt(i);
+                }
+            } else if (duration.charAt(i) == 'P') {
+                parsing_time   = false;
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'Y') {
+                try {
+                    years = Integer.parseInt(current_number);
+                } catch (Exception ex) {
+                    years = 0;
+                }
+
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'M') {
+                if (parsing_time) {
+                    try {
+                        mins = Integer.parseInt(current_number);
+                    } catch (Exception ex) {
+                        mins = 0;
+                    }
+                } else {
+                    try {
+                        months = Integer.parseInt(current_number);
+                    } catch (Exception ex) {
+                        months = 0;
+                    }
+                }
+
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'W') {
+                try {
+                    weeks = Integer.parseInt(current_number);
+                } catch (Exception ex) {
+                    weeks = 0;
+                }
+
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'D') {
+                try {
+                    days = Integer.parseInt(current_number);
+                } catch (Exception ex) {
+                    days = 0;
+                }
+
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'T') {
+                parsing_time   = true;
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'H') {
+                try {
+                    hours = Integer.parseInt(current_number);
+                } catch (Exception ex) {
+                    hours = 0;
+                }
+
+                ignore_digits  = false;
+                current_number = "";
+            } else if (duration.charAt(i) == 'S') {
+                try {
+                    secs = Integer.parseInt(current_number);
+                } catch (Exception ex) {
+                    secs = 0;
+                }
+
+                ignore_digits  = false;
+                current_number = "";
+            }
+        }
+
+        if (years != 0) {
+            result += String.valueOf(years) + "y ";
+        }
+        if (months != 0) {
+            result += String.valueOf(months) + "m ";
+        }
+        if (weeks != 0) {
+            result += String.valueOf(weeks) + "w ";
+        }
+        if (days != 0) {
+            result += String.valueOf(days) + "d ";
+        }
+        result += ZeroPad(hours) + ":" + ZeroPad(mins) + ":" + ZeroPad(secs);
+
+        return result;
+    }
+
+    public static String ZeroPad(int num) {
+        if (num < 10) {
+            return new String("0") + String.valueOf(num);
+        } else {
+            return                   String.valueOf(num);
+        }
+    }
+
     public static String MakeValidFilename(String string) {
         String file_name = new String(string);
 
