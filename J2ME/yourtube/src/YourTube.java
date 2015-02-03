@@ -210,7 +210,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
         HelpForm.append(spacer);
 
-        StringItem str_item = new StringItem("", "YourTube is an open source J2ME YouTube video downloader for mobile phones." + "\n\n" +
+        StringItem str_item = new StringItem("", "J2ME video downloader for mobile phones." + "\n\n" +
                                                  "If you have any questions regarding this application, you can contact application developer on this website:" + "\n\n" +
                                                  url);
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
@@ -240,7 +240,7 @@ public class YourTube extends MIDlet implements CommandListener {
             youtube_video_names = new String[0];
         }
 
-        SearchSearchStringTextField    = new TextField("YouTube Search", SearchString, 128, TextField.ANY);
+        SearchSearchStringTextField    = new TextField("Video Search", SearchString, 128, TextField.ANY);
         SearchSearchResultsChoiceGroup = new ChoiceGroup("Search Results", ChoiceGroup.EXCLUSIVE, youtube_video_names, null);
 
         if (SearchResultsSelectedIndex >= 0 && SearchResultsSelectedIndex < youtube_video_names.length) {
@@ -248,7 +248,7 @@ public class YourTube extends MIDlet implements CommandListener {
         }
         SearchSearchResultsChoiceGroup.setFitPolicy(ChoiceGroup.TEXT_WRAP_ON);
 
-        SearchForm = new Form("YouTube Search");
+        SearchForm = new Form("Video Search");
         SearchForm.append(SearchSearchStringTextField);
         SearchForm.append(SearchSearchResultsChoiceGroup);
         SearchForm.addCommand(CMD_SEARCH);
@@ -269,7 +269,7 @@ public class YourTube extends MIDlet implements CommandListener {
         Spacer     spacer;
         StringItem str_item;
 
-        PropertiesForm = new Form("YouTube Video Properties");
+        PropertiesForm = new Form("Video Properties");
 
         if (PropertiesForm.getWidth() < PropertiesForm.getHeight()) {
             image_width = PropertiesForm.getWidth()  - 10;
@@ -349,7 +349,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
         DownloadVideoFormatChoiceGroup.setSelectedIndex(selected_format, true);
 
-        DownloadForm = new Form("Download YouTube Video");
+        DownloadForm = new Form("Download Video");
         DownloadForm.append(DownloadFileNameTextField);
         DownloadForm.append(DownloadVideoFormatChoiceGroup);
         DownloadForm.addCommand(CMD_OK);
@@ -375,7 +375,7 @@ public class YourTube extends MIDlet implements CommandListener {
                     download_names[i]   = ((DownloadClass)downloads.elementAt(i)).GetVisibleName();
                 }
 
-                DownloadsList = new List("YouTube Downloads", Choice.IMPLICIT, download_names, null);
+                DownloadsList = new List("Video Downloads", Choice.IMPLICIT, download_names, null);
 
                 DownloadsList.setFitPolicy(List.TEXT_WRAP_ON);
 
@@ -561,7 +561,7 @@ public class YourTube extends MIDlet implements CommandListener {
                             BgOperationThread = new Thread() {
                                 public void run() {
                                     try {
-                                        ShowProgressMessage("Searching YouTube...");
+                                        ShowProgressMessage("Searching for video...");
 
                                         APIClass.MakeSearch(search_string);
 
