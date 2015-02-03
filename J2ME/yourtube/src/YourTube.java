@@ -154,10 +154,14 @@ public class YourTube extends MIDlet implements CommandListener {
     }
 
     private void ShowAboutForm() {
+        String name    = getAppProperty("MIDlet-Name");
         String version = getAppProperty("MIDlet-Version");
         String vendor  = getAppProperty("MIDlet-Vendor");
         String url     = getAppProperty("MIDlet-Info-URL");
 
+        if (name == null) {
+            name = "Unknown name";
+        }
         if (version == null) {
             version = "Unknown version";
         }
@@ -184,7 +188,7 @@ public class YourTube extends MIDlet implements CommandListener {
 
         AboutForm.append(spacer);
 
-        StringItem str_item = new StringItem("", "YourTube Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
+        StringItem str_item = new StringItem("", name + " Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER);
 
