@@ -121,6 +121,9 @@ public class DownloaderClass extends Object {
                                                 InputStreamReader input_stream_reader = null;
 
                                                 try {
+                                                    SetDownloadSize(active_download, 0);
+                                                    SetDownloadDone(active_download, 0);
+
                                                     input_stream_reader = new InputStreamReader(input_stream);
                                                     buffer              = new StringBuffer();
                                                     
