@@ -7,16 +7,16 @@ public class APIClass extends Object {
     private static final int BUF_SIZE = 262144;
 
     private static final String YOUTUBE_API_REFERER_1      = "yourtube.sourceforge.net/api_1/api";
-    private static final String YOUTUBE_API_KEY_1          = "AIzaSyAie-d5XkX30GjI3mv7YIhjlfoscc2QhZo";
+    private static final String YOUTUBE_API_KEY_1          = "";
 
     private static final String YOUTUBE_API_REFERER_2      = "yourtube.sourceforge.net/api_2/api";
-    private static final String YOUTUBE_API_KEY_2          = "AIzaSyBjARfxlLhBsp00RGZ17_-CbBxGrmJLdX4";
+    private static final String YOUTUBE_API_KEY_2          = "";
 
     private static final String YOUTUBE_API_REFERER_3      = "yourtube.sourceforge.net/api_3/api";
-    private static final String YOUTUBE_API_KEY_3          = "AIzaSyD4Vf6QPE2AKO_0DYUvxUTRrYueny0pDyw";
+    private static final String YOUTUBE_API_KEY_3          = "";
 
     private static final String YOUTUBE_API_REFERER_4      = "yourtube.sourceforge.net/api_4/api";
-    private static final String YOUTUBE_API_KEY_4          = "AIzaSyD5RhznnhbL0PL8tEUS3hBAQyQC4-5e-1U";
+    private static final String YOUTUBE_API_KEY_4          = "";
 
     private static final String YOUTUBE_SEARCH_URL         = "https://www.googleapis.com/youtube/v3/search";
     private static final String YOUTUBE_SEARCH_ORDER       = "relevance";
