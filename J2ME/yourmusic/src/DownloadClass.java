@@ -123,11 +123,11 @@ public class DownloadClass extends Object {
         if (State == STATE_ACTIVE) {
             return "[" + String.valueOf(percent_done) + "%] " + Title;
         } else if (State == STATE_COMPLETED) {
-            return "[DONE] " + Title;
+            return "[" + LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADCLASS_DONE) + "] " + Title;
         } else if (State == STATE_ERROR) {
             return "[" + ErrorMsg + "] " + Title;
         } else if (State == STATE_QUEUED) {
-            return "[QUEUED] " + Title;
+            return "[" + LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADCLASS_QUEUED) + "] " + Title;
         } else {
             return "[???] " + Title;
         }

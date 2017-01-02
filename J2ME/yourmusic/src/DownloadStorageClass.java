@@ -72,15 +72,15 @@ public class DownloadStorageClass extends Object {
 
     public static synchronized boolean Validate(DownloadClass download) {
         if (download.GetTitle().equals("")) {
-            ValidateErrorMsg = "Download task title is empty";
+            ValidateErrorMsg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_TITLEEMPTY);
 
             return false;
         } else if (download.GetVideoId().equals("")) {
-            ValidateErrorMsg = "Download task video id is empty";
+            ValidateErrorMsg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_VIDEOIDEMPTY);
 
             return false;
         } else if (download.GetFullFileName().equals("")) {
-            ValidateErrorMsg = "Download task file name is empty";
+            ValidateErrorMsg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_FILENAMEEMPTY);
 
             return false;
         } else {
@@ -90,7 +90,7 @@ public class DownloadStorageClass extends Object {
                 DownloadClass item = (DownloadClass)hash_enum.nextElement();
 
                 if (download.GetFullFileName().toLowerCase().equals(item.GetFullFileName().toLowerCase())) {
-                    ValidateErrorMsg = "Download task with the same file name already exists";
+                    ValidateErrorMsg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_ALREADYEXISTS);
 
                     return false;
                 }
@@ -241,7 +241,7 @@ public class DownloadStorageClass extends Object {
 
             Replace(id, download);
         } else {
-            throw (new Exception("Invalid id"));
+            throw (new Exception(LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_INVALIDID)));
         }
     }
 
@@ -253,7 +253,7 @@ public class DownloadStorageClass extends Object {
 
             Replace(id, download);
         } else {
-            throw (new Exception("Invalid id"));
+            throw (new Exception(LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_INVALIDID)));
         }
     }
 
@@ -265,7 +265,7 @@ public class DownloadStorageClass extends Object {
 
             Replace(id, download);
         } else {
-            throw (new Exception("Invalid id"));
+            throw (new Exception(LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_INVALIDID)));
         }
     }
 
@@ -277,7 +277,7 @@ public class DownloadStorageClass extends Object {
 
             Replace(id, download);
         } else {
-            throw (new Exception("Invalid id"));
+            throw (new Exception(LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADSTORAGECLASS_INVALIDID)));
         }
     }
 }

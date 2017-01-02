@@ -8,6 +8,7 @@ public class DownloaderClass extends Object {
     private static final int THROTTLING_SLEEP_DELAY = 10000;
     private static final int BUF_SIZE               = 262144;
 
+    private static final String YOUTUBEINMP3_URL          = "http://www.youtubeinmp3.com";
     private static final String YOUTUBEINMP3_DOWNLOAD_URL = "http://www.youtubeinmp3.com/fetch/";
     private static final String YOUTUBE_WATCH_URL         = "https://www.youtube.com/watch";
     private static final String USER_AGENT                = "YourMusic";
@@ -114,75 +115,128 @@ public class DownloaderClass extends Object {
 
                                         if (connection.getResponseCode() == HttpConnection.HTTP_OK ||
                                             connection.getResponseCode() == HttpConnection.HTTP_PARTIAL) {
-                                            boolean        file_valid = false;
-                                            String         file_url = UtilClass.MakeFullFileURL(active_download.GetFullFileName());
-                                            FileConnection file = null;
-                                            OutputStream   output_stream = null;
+                                            if (connection.getHeaderField("Content-Type").equals("text/html")) {
+                                                int               chars_read;
+                                                StringBuffer      buffer;
+                                                InputStreamReader input_stream_reader = null;
 
-                                            if (!file_url.equals("")) {
                                                 try {
-                                                    file = (FileConnection)Connector.open(file_url, Connector.READ_WRITE);
+                                                    input_stream_reader = new InputStreamReader(input_stream);
+                                                    buffer              = new StringBuffer();
+                                                    
+                                                    char buf[] = new char[BUF_SIZE];
+                                                    
+                                                    while ((chars_read = input_stream_reader.read(buf, 0, BUF_SIZE)) != -1) {
+                                                        buffer.append(buf, 0, chars_read);
+                                                    }
+                                                    
+                                                    String new_url = "";
+                                                    String tmpstr  = buffer.toString();
+                                                    int    begin   = tmpstr.indexOf("<meta http-equiv=\"refresh\" content=\"0; url=");
 
-                                                    if (connection.getResponseCode() == HttpConnection.HTTP_PARTIAL) {
-                                                        if (file.exists() &&
-                                                            file.fileSize() == active_download.GetDone() &&
-                                                            active_download.GetDone() + connection.getLength() == active_download.GetSize()) {
-                                                            output_stream = file.openOutputStream(active_download.GetDone());
+                                                    if (begin != -1) {
+                                                        int end = tmpstr.indexOf("\"", begin + 43);
 
-                                                            file_valid = true;
+                                                        if (end != -1) {
+                                                            new_url = tmpstr.substring(begin + 43, end);
                                                         }
-                                                    } else {
-                                                        if (file.exists()) {
-                                                            file.truncate(0);
-                                                        } else {
-                                                            file.create();
-                                                        }
-
-                                                        SetDownloadSize(active_download, connection.getLength());
-                                                        SetDownloadDone(active_download, 0);
-
-                                                        output_stream = file.openOutputStream();
-
-                                                        file_valid = true;
                                                     }
 
-                                                    if (file_valid) {
-                                                        int  read;
-                                                        byte buffer[] = new byte[BUF_SIZE];
+                                                    if (!new_url.equals("")) {
+                                                        url = new_url;
 
-                                                        while ((read = input_stream.read(buffer)) >= 0 && !DownloaderStopped()) {
-                                                            WriteDownloadChunk(active_download, output_stream, buffer, read);
-                                                        }
-
-                                                        if (active_download.GetDone() == active_download.GetSize()) {
-                                                            done = true;
+                                                        if (url.startsWith("//")) {
+                                                            url = "http:" + url;
+                                                        } else if (url.startsWith("/")) {
+                                                            url = YOUTUBEINMP3_URL + url;
                                                         }
                                                     } else {
-                                                        SetDownloadSize(active_download, 0);
-                                                        SetDownloadDone(active_download, 0);
+                                                        error     = true;
+                                                        error_msg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADERCLASS_INVALIDRESPONSERETRYING);
                                                     }
                                                 } catch (Exception ex) {
                                                     error     = true;
-                                                    error_msg = "Please check destination disk settings. " + ex.toString();
+                                                    error_msg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADERCLASS_CHECKCONNECTION) + " " + ex.toString();
                                                 } finally {
-                                                    if (output_stream != null) {
+                                                    if (input_stream_reader != null) {
                                                         try {
-                                                            output_stream.close();
-                                                        } catch (Exception ex) {
-                                                            // Ignore
-                                                        }
-                                                    }
-                                                    if (file != null) {
-                                                        try {
-                                                            file.close();
+                                                            input_stream_reader.close();
                                                         } catch (Exception ex) {
                                                             // Ignore
                                                         }
                                                     }
                                                 }
                                             } else {
-                                                error     = true;
-                                                error_msg = "Please check destination disk settings. Could not find or create music directory";
+                                                boolean        file_valid = false;
+                                                String         file_url = UtilClass.MakeFullFileURL(active_download.GetFullFileName());
+                                                FileConnection file = null;
+                                                OutputStream   output_stream = null;
+
+                                                if (!file_url.equals("")) {
+                                                    try {
+                                                        file = (FileConnection)Connector.open(file_url, Connector.READ_WRITE);
+
+                                                        if (connection.getResponseCode() == HttpConnection.HTTP_PARTIAL) {
+                                                            if (file.exists() &&
+                                                                file.fileSize() == active_download.GetDone() &&
+                                                                active_download.GetDone() + connection.getLength() == active_download.GetSize()) {
+                                                                output_stream = file.openOutputStream(active_download.GetDone());
+
+                                                                file_valid = true;
+                                                            }
+                                                        } else {
+                                                            if (file.exists()) {
+                                                                file.truncate(0);
+                                                            } else {
+                                                                file.create();
+                                                            }
+
+                                                            SetDownloadSize(active_download, connection.getLength());
+                                                            SetDownloadDone(active_download, 0);
+
+                                                            output_stream = file.openOutputStream();
+
+                                                            file_valid = true;
+                                                        }
+
+                                                        if (file_valid) {
+                                                            int  read;
+                                                            byte buffer[] = new byte[BUF_SIZE];
+
+                                                            while ((read = input_stream.read(buffer)) >= 0 && !DownloaderStopped()) {
+                                                                WriteDownloadChunk(active_download, output_stream, buffer, read);
+                                                            }
+
+                                                            if (active_download.GetDone() == active_download.GetSize()) {
+                                                                done = true;
+                                                            }
+                                                        } else {
+                                                            SetDownloadSize(active_download, 0);
+                                                            SetDownloadDone(active_download, 0);
+                                                        }
+                                                    } catch (Exception ex) {
+                                                        error     = true;
+                                                        error_msg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADERCLASS_CHECKDISKSETTINGS) + " " + ex.toString();
+                                                    } finally {
+                                                        if (output_stream != null) {
+                                                            try {
+                                                                output_stream.close();
+                                                            } catch (Exception ex) {
+                                                                // Ignore
+                                                            }
+                                                        }
+                                                        if (file != null) {
+                                                            try {
+                                                                file.close();
+                                                            } catch (Exception ex) {
+                                                                // Ignore
+                                                            }
+                                                        }
+                                                    }
+                                                } else {
+                                                    error     = true;
+                                                    error_msg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADERCLASS_CHECKDISKSETTINGS);
+                                                }
                                             }
                                         } else if (connection.getResponseCode() == HttpConnection.HTTP_MOVED_PERM ||
                                                    connection.getResponseCode() == HttpConnection.HTTP_SEE_OTHER ||
@@ -194,12 +248,13 @@ public class DownloaderClass extends Object {
                                             }
                                         } else {
                                             error     = true;
-                                            error_msg = "Invalid server response: " + String.valueOf(connection.getResponseCode()) + " " +
-                                                                                      connection.getResponseMessage();
+                                            error_msg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADERCLASS_INVALIDRESPONSE) + " " +
+                                                        String.valueOf(connection.getResponseCode()) + " " +
+                                                        connection.getResponseMessage();
                                         }
                                     } catch (Exception ex) {
                                         error     = true;
-                                        error_msg = "Please check your Internet connection. " + ex.toString();
+                                        error_msg = LocalizationClass.GetLocalizedString(LocalizationClass.DOWNLOADERCLASS_CHECKCONNECTION) + " " + ex.toString();
                                     } finally {
                                         if (input_stream != null) {
                                             try {

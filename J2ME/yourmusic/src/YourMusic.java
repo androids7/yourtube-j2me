@@ -7,26 +7,26 @@ public class YourMusic extends MIDlet implements CommandListener {
     private static final int APP_ACTIVE    = 1;
     private static final int APP_DESTROYED = 2;
 
-    private static final Command CMD_OK               = new Command("OK",               Command.OK,     1);
-    private static final Command CMD_BACK             = new Command("Back",             Command.BACK,   1);
-    private static final Command CMD_EXIT             = new Command("Exit",             Command.EXIT,   2);
-
-    private static final Command CMD_REFRESH          = new Command("Refresh",          Command.SCREEN, 1);
-
-    private static final Command CMD_SEARCH           = new Command("Search",           Command.OK,     1);
-    private static final Command CMD_DOWNLOAD         = new Command("Download",         Command.SCREEN, 2);
-    private static final Command CMD_PROPERTIES       = new Command("Music Properties", Command.SCREEN, 2);
-    private static final Command CMD_DOWNLOADS_SCREEN = new Command("Downloads Screen", Command.SCREEN, 2);
-    private static final Command CMD_SETTINGS         = new Command("Settings",         Command.SCREEN, 2);
-    private static final Command CMD_ABOUT            = new Command("About",            Command.SCREEN, 2);
-    private static final Command CMD_HELP             = new Command("Help",             Command.HELP,   2);
-
-    private static final Command CMD_DELETE           = new Command("Delete",           Command.ITEM,   1);
-
     private static final String APP_ABOUT_ICON = "/icons/icon-about.png";
 
     private static final int SLEEP_DELAY              = 1000;
     private static final int MAX_FNAME_DUPCHECK_TRIES = 100;
+
+    private static Command CMD_OK               = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDOK_LABEL),               Command.OK,     1);
+    private static Command CMD_BACK             = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDBACK_LABEL),             Command.BACK,   1);
+    private static Command CMD_EXIT             = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDEXIT_LABEL),             Command.EXIT,   2);
+
+    private static Command CMD_REFRESH          = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDREFRESH_LABEL),          Command.SCREEN, 1);
+
+    private static Command CMD_SEARCH           = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDSEARCH_LABEL),           Command.OK,     1);
+    private static Command CMD_DOWNLOAD         = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDDOWNLOAD_LABEL),         Command.SCREEN, 2);
+    private static Command CMD_PROPERTIES       = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDPROPERTIES_LABEL),       Command.SCREEN, 2);
+    private static Command CMD_DOWNLOADS_SCREEN = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDDOWNLOADSSCREEN_LABEL),  Command.SCREEN, 2);
+    private static Command CMD_SETTINGS         = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDSETTINGS_LABEL),         Command.SCREEN, 2);
+    private static Command CMD_ABOUT            = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDABOUT_LABEL),            Command.SCREEN, 2);
+    private static Command CMD_HELP             = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDHELP_LABEL),             Command.HELP,   2);
+
+    private static Command CMD_DELETE           = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDDELETE_LABEL),           Command.ITEM,   1);
 
     private boolean PauseUpdate,
                     StopUpdate;
@@ -111,7 +111,7 @@ public class YourMusic extends MIDlet implements CommandListener {
     }
 
     private void ShowInitErrorMessage(String text) {
-        InitErrorAlert = new Alert("Application Initialization Error", text, null, AlertType.ALARM);
+        InitErrorAlert = new Alert(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_INITERRORALERT_TITLE), text, null, AlertType.ALARM);
 
         InitErrorAlert.setTimeout(Alert.FOREVER);
         InitErrorAlert.addCommand(CMD_EXIT);
@@ -121,21 +121,21 @@ public class YourMusic extends MIDlet implements CommandListener {
     }
 
     private void ShowErrorMessage(String text) {
-        Alert alert = new Alert("Error", text, null, AlertType.ERROR);
+        Alert alert = new Alert(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ERRORALERT_TITLE), text, null, AlertType.ERROR);
         alert.setTimeout(Alert.FOREVER);
 
         Display.getDisplay(this).setCurrent(alert, Display.getDisplay(this).getCurrent());
     }
 
     private void ShowErrorMessage(String text, Displayable next) {
-        Alert alert = new Alert("Error", text, null, AlertType.ERROR);
+        Alert alert = new Alert(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ERRORALERT_TITLE), text, null, AlertType.ERROR);
         alert.setTimeout(Alert.FOREVER);
 
         Display.getDisplay(this).setCurrent(alert, next);
     }
 
     private void ShowProgressMessage(String text) {
-        ProgressAlert = new Alert("Operation In Progress", text, null, AlertType.INFO);
+        ProgressAlert = new Alert(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_PROGRESSALERT_TITLE), text, null, AlertType.INFO);
 
         ProgressAlert.setTimeout(Alert.FOREVER);
         ProgressAlert.addCommand(CMD_REFRESH);
@@ -151,19 +151,19 @@ public class YourMusic extends MIDlet implements CommandListener {
         String url     = getAppProperty("MIDlet-Info-URL");
 
         if (name == null) {
-            name = "Unknown name";
+            name = LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_UNKNOWNNAME);
         }
         if (version == null) {
-            version = "Unknown version";
+            version = LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_UNKNOWNVERSION);
         }
         if (vendor == null) {
-            vendor = "Unknown vendor";
+            vendor = LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_UNKNOWNVENDOR);
         }
         if (url == null) {
-            url = "Unknown info URL";
+            url = LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_UNKNOWNINFOURL);
         }
 
-        AboutForm = new Form("About");
+        AboutForm = new Form(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_TITLE));
 
         try {
             ImageItem icon = new ImageItem(null, Image.createImage(APP_ABOUT_ICON),
@@ -179,7 +179,9 @@ public class YourMusic extends MIDlet implements CommandListener {
 
         AboutForm.append(spacer);
 
-        StringItem str_item = new StringItem("", name + " Version " + version + "\n\n" + "Developer: " + vendor + "\n\n" + url);
+        StringItem str_item = new StringItem("", name + " " +
+                                                 LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_VERSION) + " " + version + "\n\n" +
+                                                 LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_ABOUTFORM_DEVELOPER) + " " + vendor + "\n\n" + url);
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER);
 
@@ -195,19 +197,17 @@ public class YourMusic extends MIDlet implements CommandListener {
         String url = getAppProperty("MIDlet-Info-URL");
 
         if (url == null) {
-            url = "Unknown info URL";
+            url = LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_HELPFORM_UNKNOWNINFOURL);
         }
 
-        HelpForm = new Form("Help");
+        HelpForm = new Form(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_HELPFORM_TITLE));
 
         Spacer spacer = new Spacer(0, Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM).getHeight());
         spacer.setLayout(Item.LAYOUT_CENTER | Item.LAYOUT_NEWLINE_AFTER);
 
         HelpForm.append(spacer);
 
-        StringItem str_item = new StringItem("", "J2ME music downloader for mobile phones." + "\n\n" +
-                                                 "If you have any questions regarding this application, you can contact application developer on this website:" + "\n\n" +
-                                                 url);
+        StringItem str_item = new StringItem("", LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_HELPFORM_TEXT) + "\n\n" + url);
         str_item.setFont(Font.getFont(Font.FACE_SYSTEM, Font.STYLE_PLAIN, Font.SIZE_MEDIUM));
         str_item.setLayout(Item.LAYOUT_CENTER);
 
@@ -235,15 +235,15 @@ public class YourMusic extends MIDlet implements CommandListener {
             youtube_video_names = new String[0];
         }
 
-        SearchSearchStringTextField    = new TextField("Music Search", SearchString, 128, TextField.ANY);
-        SearchSearchResultsChoiceGroup = new ChoiceGroup("Search Results", ChoiceGroup.EXCLUSIVE, youtube_video_names, null);
+        SearchSearchStringTextField    = new TextField(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_SEARCHSEARCHSTRINGTEXTFIELD_LABEL), SearchString, 128, TextField.ANY);
+        SearchSearchResultsChoiceGroup = new ChoiceGroup(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_SEARCHSEARCHRESULTSCHOICEGROUP_LABEL), ChoiceGroup.EXCLUSIVE, youtube_video_names, null);
 
         if (SearchResultsSelectedIndex >= 0 && SearchResultsSelectedIndex < youtube_video_names.length) {
             SearchSearchResultsChoiceGroup.setSelectedIndex(SearchResultsSelectedIndex, true);
         }
         SearchSearchResultsChoiceGroup.setFitPolicy(ChoiceGroup.TEXT_WRAP_ON);
 
-        SearchForm = new Form("Music Search");
+        SearchForm = new Form(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_SEARCHFORM_TITLE));
         SearchForm.append(SearchSearchStringTextField);
         SearchForm.append(SearchSearchResultsChoiceGroup);
         SearchForm.addCommand(CMD_SEARCH);
@@ -264,7 +264,7 @@ public class YourMusic extends MIDlet implements CommandListener {
         Spacer     spacer;
         StringItem str_item;
 
-        PropertiesForm = new Form("Music Properties");
+        PropertiesForm = new Form(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_PROPERTIESFORM_TITLE));
 
         if (PropertiesForm.getWidth() < PropertiesForm.getHeight()) {
             image_width = PropertiesForm.getWidth()  - 10;
@@ -325,9 +325,9 @@ public class YourMusic extends MIDlet implements CommandListener {
             }
         }
 
-        DownloadFileNameTextField = new TextField("File Name", file_name, 256, TextField.ANY);
+        DownloadFileNameTextField = new TextField(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_DOWNLOADFILENAMETEXTFIELD_LABEL), file_name, 256, TextField.ANY);
 
-        DownloadForm = new Form("Download Music");
+        DownloadForm = new Form(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_DOWNLOADFORM_TITLE));
         DownloadForm.append(DownloadFileNameTextField);
         DownloadForm.addCommand(CMD_OK);
         DownloadForm.addCommand(CMD_BACK);
@@ -352,7 +352,7 @@ public class YourMusic extends MIDlet implements CommandListener {
                     download_names[i]   = ((DownloadClass)downloads.elementAt(i)).GetVisibleName();
                 }
 
-                DownloadsList = new List("Music Downloads", Choice.IMPLICIT, download_names, null);
+                DownloadsList = new List(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_DOWNLOADSLIST_TITLE), Choice.IMPLICIT, download_names, null);
 
                 DownloadsList.setFitPolicy(List.TEXT_WRAP_ON);
 
@@ -450,13 +450,13 @@ public class YourMusic extends MIDlet implements CommandListener {
             }
         }
 
-        SettingsDstFSRootChoiceGroup = new ChoiceGroup("Destination Disk", ChoiceGroup.POPUP, root_names, null);
+        SettingsDstFSRootChoiceGroup = new ChoiceGroup(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_SETTINGSDSTFSROOTCHOICEGROUP_LABEL), ChoiceGroup.POPUP, root_names, null);
 
         if (SettingsDstFSRootChoiceGroup.size() != 0) {
             SettingsDstFSRootChoiceGroup.setSelectedIndex(selected_disk, true);
         }
 
-        SettingsForm = new Form("Settings");
+        SettingsForm = new Form(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_SETTINGSFORM_TITLE));
         SettingsForm.append(SettingsDstFSRootChoiceGroup);
         SettingsForm.addCommand(CMD_OK);
         SettingsForm.addCommand(CMD_BACK);
@@ -465,14 +465,35 @@ public class YourMusic extends MIDlet implements CommandListener {
         Display.getDisplay(this).setCurrent(SettingsForm);
     }
 
+    private void LocalizeCommands() {
+        CMD_OK               = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDOK_LABEL),               Command.OK,     1);
+        CMD_BACK             = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDBACK_LABEL),             Command.BACK,   1);
+        CMD_EXIT             = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDEXIT_LABEL),             Command.EXIT,   2);
+
+        CMD_REFRESH          = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDREFRESH_LABEL),          Command.SCREEN, 1);
+
+        CMD_SEARCH           = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDSEARCH_LABEL),           Command.OK,     1);
+        CMD_DOWNLOAD         = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDDOWNLOAD_LABEL),         Command.SCREEN, 2);
+        CMD_PROPERTIES       = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDPROPERTIES_LABEL),       Command.SCREEN, 2);
+        CMD_DOWNLOADS_SCREEN = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDDOWNLOADSSCREEN_LABEL),  Command.SCREEN, 2);
+        CMD_SETTINGS         = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDSETTINGS_LABEL),         Command.SCREEN, 2);
+        CMD_ABOUT            = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDABOUT_LABEL),            Command.SCREEN, 2);
+        CMD_HELP             = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDHELP_LABEL),             Command.HELP,   2);
+
+        CMD_DELETE           = new Command(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CMDDELETE_LABEL),           Command.ITEM,   1);
+    }
+    
     public void startApp() {
         synchronized (this) {
             if (AppState == APP_STARTED) {
                 if (UtilClass.ValidateFileConnectionAPI()) {
                     try {
+                        LocalizationClass.Initialize();
                         SettingStorageClass.Initialize();
                         DownloadStorageClass.Initialize();
                         DownloaderClass.Initialize();
+
+                        LocalizeCommands();
 
                         if (SettingStorageClass.GetShowSettingsOnLaunch()) {
                             SettingStorageClass.SetShowSettingsOnLaunch(false);
@@ -487,7 +508,7 @@ public class YourMusic extends MIDlet implements CommandListener {
                         ShowInitErrorMessage(ex.toString());
                     }
                 } else {
-                    ShowInitErrorMessage("Application is not available on this platform");
+                    ShowInitErrorMessage(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_APPUNAVAILABLE));
                 }
             }
 
@@ -538,13 +559,13 @@ public class YourMusic extends MIDlet implements CommandListener {
                             BgOperationThread = new Thread() {
                                 public void run() {
                                     try {
-                                        ShowProgressMessage("Searching for music...");
+                                        ShowProgressMessage(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_SEARCHINPROGRESS));
 
                                         APIClass.MakeSearch(search_string);
 
                                         ShowSearchForm();
                                     } catch (Exception ex) {
-                                        ShowErrorMessage("Please check your Internet connection. " + ex.toString(), SearchForm);
+                                        ShowErrorMessage(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_CHECKCONNECTION) + " " + ex.toString(), SearchForm);
                                     }
                                 }
                             };
@@ -567,7 +588,7 @@ public class YourMusic extends MIDlet implements CommandListener {
                         if (BgOperationThread == null || !BgOperationThread.isAlive()) {
                             BgOperationThread = new Thread() {
                                 public void run() {
-                                    ShowProgressMessage("Loading music properties...");
+                                    ShowProgressMessage(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_LOADINGPROPERTIES));
 
                                     Image video_thumbnail = UtilClass.LoadImageFromURL(youtube_video.GetThumbnailURL());
 
@@ -625,7 +646,7 @@ public class YourMusic extends MIDlet implements CommandListener {
                                 ShowErrorMessage(ex.toString());
                             }
                         } else {
-                            ShowErrorMessage("File name is empty");
+                            ShowErrorMessage(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_FILENAMEEMPTY));
                         }
                     }
                 } else if (command == CMD_BACK) {
@@ -636,8 +657,9 @@ public class YourMusic extends MIDlet implements CommandListener {
                     if (DownloadsList.getSelectedIndex() != -1) {
                         PauseDownloadsListUpdate();
 
-                        ShowDeleteDownloadForm("Delete Download", "Delete download \"" +
-                                                DownloadStorageClass.GetCopy(DownloadsListIds[DownloadsList.getSelectedIndex()]).GetTitle() + "\" ?");
+                        ShowDeleteDownloadForm(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_DELETEDOWNLOAD_HEADER),
+                                               LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_DELETEDOWNLOAD_TEXT) + " \"" +
+                                               DownloadStorageClass.GetCopy(DownloadsListIds[DownloadsList.getSelectedIndex()]).GetTitle() + "\" ?");
                     }
                 } else if (command == CMD_BACK) {
                     ShowSearchForm();
@@ -671,7 +693,7 @@ public class YourMusic extends MIDlet implements CommandListener {
                             ShowErrorMessage(ex.toString());
                         }
                     } else {
-                        ShowErrorMessage("No disk selected");
+                        ShowErrorMessage(LocalizationClass.GetLocalizedString(LocalizationClass.YOURMUSIC_NODISKSELECTED));
                     }
                 } else if (command == CMD_BACK) {
                     ShowSearchForm();
