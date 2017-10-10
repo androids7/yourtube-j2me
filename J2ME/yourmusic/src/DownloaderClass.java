@@ -8,10 +8,10 @@ public class DownloaderClass extends Object {
     private static final int THROTTLING_SLEEP_DELAY = 10000;
     private static final int BUF_SIZE               = 262144;
 
-    private static final String YOUTUBEINMP3_URL          = "http://www.youtubeinmp3.com";
-    private static final String YOUTUBEINMP3_DOWNLOAD_URL = "http://www.youtubeinmp3.com/fetch/";
-    private static final String YOUTUBE_WATCH_URL         = "https://www.youtube.com/watch";
-    private static final String USER_AGENT                = "YourMusic";
+    private static final String CONVERTMP3_URL          = "http://www.convertmp3.io";
+    private static final String CONVERTMP3_DOWNLOAD_URL = "http://www.convertmp3.io/fetch/";
+    private static final String YOUTUBE_WATCH_URL       = "https://www.youtube.com/watch";
+    private static final String USER_AGENT              = "YourMusic";
 
     private static boolean StopDownloader;
 
@@ -91,9 +91,9 @@ public class DownloaderClass extends Object {
                             try {
                                 boolean done = false, error = false;
                                 String  error_msg = "";
-                                String  url = YOUTUBEINMP3_DOWNLOAD_URL +
-                                              "?video="                 + UtilClass.URLEncode(YOUTUBE_WATCH_URL +
-                                                                                              "?v="             + UtilClass.URLEncode(active_download.GetVideoId()));
+                                String  url = CONVERTMP3_DOWNLOAD_URL +
+                                              "?video="               + UtilClass.URLEncode(YOUTUBE_WATCH_URL +
+                                                                                            "?v="             + UtilClass.URLEncode(active_download.GetVideoId()));
 
                                 SetDownloadState(active_download, DownloadClass.STATE_ACTIVE, "");
 
@@ -151,7 +151,7 @@ public class DownloaderClass extends Object {
                                                         if (url.startsWith("//")) {
                                                             url = "http:" + url;
                                                         } else if (url.startsWith("/")) {
-                                                            url = YOUTUBEINMP3_URL + url;
+                                                            url = CONVERTMP3_URL + url;
                                                         }
                                                     } else {
                                                         error     = true;
